@@ -1,0 +1,305 @@
+/* CareerFlow Pro Theme - Enhanced Professional Design */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Primary Colors */
+  --primary-blue: #1e3a8a;
+  --primary-blue-light: #3b82f6;
+  --primary-blue-dark: #1e40af;
+  
+  /* Secondary Colors */
+  --secondary-teal: #0d9488;
+  --secondary-teal-light: #14b8a6;
+  --secondary-teal-dark: #0f766e;
+  
+  /* Accent Colors */
+  --accent-gold: #f59e0b;
+  --accent-gold-light: #fbbf24;
+  --accent-gold-dark: #d97706;
+  
+  /* Neutral Colors */
+  --neutral-white: #ffffff;
+  --neutral-gray-50: #f8fafc;
+  --neutral-gray-100: #f1f5f9;
+  --neutral-gray-200: #e2e8f0;
+  --neutral-gray-300: #cbd5e1;
+  --neutral-gray-400: #94a3b8;
+  --neutral-gray-500: #64748b;
+  --neutral-gray-600: #475569;
+  --neutral-gray-700: #334155;
+  --neutral-gray-800: #1e293b;
+  --neutral-gray-900: #0f172a;
+  
+  /* Status Colors */
+  --success-green: #10b981;
+  --warning-orange: #f59e0b;
+  --error-red: #ef4444;
+  --info-blue: #3b82f6;
+  
+  /* Typography */
+  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.125rem;
+  --radius-base: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Transitions */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--neutral-gray-700);
+  background-color: var(--neutral-gray-50);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Component Base Styles */
+@layer components {
+         /* Enhanced Button Components */
+         .btn-primary {
+           @apply bg-gradient-to-r from-primary-600 to-primary-800 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 ease-in-out;
+           @apply hover:from-primary-700 hover:to-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+           @apply active:transform active:scale-95 shadow-lg hover:shadow-xl;
+         }
+  
+  .btn-secondary {
+    @apply bg-secondary-600 text-white font-medium px-4 py-2 rounded-md transition-all duration-300 ease-in-out;
+    @apply hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2;
+    @apply active:transform active:scale-95;
+  }
+  
+  .btn-outline {
+    @apply border border-primary-800 text-primary-800 font-medium px-4 py-2 rounded-md transition-all duration-300 ease-in-out;
+    @apply hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply active:transform active:scale-95;
+  }
+  
+  .btn-ghost {
+    @apply text-primary-800 font-medium px-4 py-2 rounded-md transition-all duration-300 ease-in-out;
+    @apply hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+  
+  .btn-success {
+    @apply bg-success-500 text-white font-medium px-4 py-2 rounded-md transition-all duration-300 ease-in-out;
+    @apply hover:bg-success-600 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2;
+  }
+  
+  .btn-warning {
+    @apply bg-warning-500 text-white font-medium px-4 py-2 rounded-md transition-all duration-300 ease-in-out;
+    @apply hover:bg-warning-600 focus:outline-none focus:ring-2 focus:ring-warning-500 focus:ring-offset-2;
+  }
+  
+  .btn-error {
+    @apply bg-error-500 text-white font-medium px-4 py-2 rounded-md transition-all duration-300 ease-in-out;
+    @apply hover:bg-error-600 focus:outline-none focus:ring-2 focus:ring-error-500 focus:ring-offset-2;
+  }
+  
+  /* Button Sizes */
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+  
+  .btn-md {
+    @apply px-4 py-2 text-base;
+  }
+  
+  .btn-lg {
+    @apply px-6 py-3 text-lg;
+  }
+  
+  /* Enhanced Card Components */
+  .card {
+    @apply bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-8 transition-all duration-500 ease-in-out;
+    @apply hover:shadow-2xl hover:-translate-y-2 hover:bg-white/95;
+    @apply relative overflow-hidden;
+  }
+  
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-teal), var(--accent-gold));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .card:hover::before {
+    opacity: 1;
+  }
+  
+  .card-hover {
+    @apply hover:shadow-2xl hover:-translate-y-2;
+  }
+  
+  .card-header {
+    @apply border-b border-gray-200 pb-4 mb-4;
+  }
+  
+  .card-footer {
+    @apply border-t border-gray-200 pt-4 mt-4;
+  }
+  
+  /* Form Components */
+  .input-field {
+    @apply border border-gray-300 rounded-md px-3 py-2 text-base transition-all duration-300 ease-in-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+    @apply placeholder:text-gray-400;
+  }
+  
+  .input-field-error {
+    @apply border-error-500 focus:ring-error-500 focus:border-error-500;
+  }
+  
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+  
+  .error-message {
+    @apply text-sm text-error-600 mt-1;
+  }
+  
+  /* Navigation Components */
+  .nav-link {
+    @apply text-gray-600 hover:text-primary-800 font-medium transition-colors duration-200;
+  }
+  
+  .nav-link-active {
+    @apply text-primary-800 font-semibold;
+  }
+  
+  /* Status Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .badge-success {
+    @apply bg-success-100 text-success-800;
+  }
+  
+  .badge-warning {
+    @apply bg-warning-100 text-warning-800;
+  }
+  
+  .badge-error {
+    @apply bg-error-100 text-error-800;
+  }
+  
+  .badge-info {
+    @apply bg-info-100 text-info-800;
+  }
+  
+  /* Loading Spinner */
+  .spinner {
+    @apply animate-spin rounded-full border-2 border-gray-300 border-t-primary-800;
+  }
+  
+  /* Modal Overlay */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  }
+  
+  /* Container */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Responsive Container */
+  .container-responsive {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent;
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  .shadow-glow-secondary {
+    box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .container-custom {
+    @apply px-4;
+  }
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --neutral-white: #0f172a;
+    --neutral-gray-50: #1e293b;
+    --neutral-gray-100: #334155;
+    --neutral-gray-900: #f8fafc;
+  }
+  
+  body {
+    background-color: var(--neutral-gray-50);
+    color: var(--neutral-gray-100);
+  }
+  
+  .card {
+    @apply bg-gray-800 border-gray-700;
+  }
+}
