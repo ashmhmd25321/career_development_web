@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '../ui';
 import { useAuth } from '../../contexts/AuthContext';
 import { AuthModal } from '../auth';
@@ -45,6 +46,11 @@ export const Header: React.FC = () => {
             
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6">
+              <Link to="/jobs">
+                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
+                  Jobs
+                </Button>
+              </Link>
               <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
                 Features
               </Button>

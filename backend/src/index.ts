@@ -50,6 +50,8 @@ app.get('/health', (req, res) => {
 
 // API routes
 import authRoutes from '@/routes/auth';
+import jobRoutes from '@/routes/jobs';
+import jobCategoryRoutes from '@/routes/jobCategories';
 
 app.get('/api', (req, res) => {
   res.json({
@@ -61,6 +63,12 @@ app.get('/api', (req, res) => {
 
 // Authentication routes
 app.use('/api/auth', authRoutes);
+
+// Job routes
+app.use('/api/jobs', jobRoutes);
+
+// Job categories routes
+app.use('/api/job-categories', jobCategoryRoutes);
 
 // Error handling middleware
 app.use(notFound);

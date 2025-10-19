@@ -81,9 +81,20 @@ export interface JobCategory {
   id: number;
   name: string;
   description?: string;
-  is_active: boolean;
-  created_at: Date;
-  updated_at: Date;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateJobCategoryData {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateJobCategoryData {
+  name?: string;
+  description?: string;
+  isActive?: boolean;
 }
 
 export interface Skill {
@@ -98,28 +109,35 @@ export interface Skill {
 
 export interface Job {
   id: number;
-  employer_id: number;
+  employerId: number;
   title: string;
   description: string;
   requirements?: string;
   responsibilities?: string;
   benefits?: string;
-  job_type: 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
-  location_type: 'remote' | 'on-site' | 'hybrid';
+  jobType: 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
+  locationType: 'remote' | 'on-site' | 'hybrid';
   location?: string;
-  salary_min?: number;
-  salary_max?: number;
-  salary_currency: string;
-  experience_level: 'entry' | 'mid' | 'senior' | 'executive';
-  category_id?: number;
-  application_deadline?: Date;
-  start_date?: Date;
-  is_active: boolean;
-  is_featured: boolean;
-  views_count: number;
-  applications_count: number;
-  created_at: Date;
-  updated_at: Date;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency: string;
+  experienceLevel: 'entry' | 'mid' | 'senior' | 'executive';
+  categoryId?: number;
+  applicationDeadline?: Date;
+  startDate?: Date;
+  isActive: boolean;
+  isFeatured: boolean;
+  viewsCount: number;
+  applicationsCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  // Additional fields from joins
+  companyName?: string;
+  companySize?: string;
+  industry?: string;
+  logoUrl?: string;
+  websiteUrl?: string;
+  categoryName?: string;
 }
 
 export interface JobSkill {
@@ -208,8 +226,10 @@ export interface RefreshToken {
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
+  message?: string;
   error?: {
     message: string;
+    code?: string;
     stack?: string;
   };
   timestamp: string;
@@ -247,21 +267,36 @@ export interface CreateJobRequest {
   requirements?: string;
   responsibilities?: string;
   benefits?: string;
-  job_type: Job['job_type'];
-  location_type: Job['location_type'];
+  jobType: 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
+  locationType: 'remote' | 'on-site' | 'hybrid';
   location?: string;
-  salary_min?: number;
-  salary_max?: number;
-  salary_currency?: string;
-  experience_level: Job['experience_level'];
-  category_id?: number;
-  application_deadline?: string;
-  start_date?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  experienceLevel: 'entry' | 'mid' | 'senior' | 'executive';
+  categoryId?: number;
+  applicationDeadline?: string;
+  startDate?: string;
   skills?: number[];
 }
 
-export interface UpdateJobRequest extends Partial<CreateJobRequest> {
-  id: number;
+export interface UpdateJobRequest {
+  title?: string;
+  description?: string;
+  requirements?: string;
+  responsibilities?: string;
+  benefits?: string;
+  jobType?: 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
+  locationType?: 'remote' | 'on-site' | 'hybrid';
+  location?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  experienceLevel?: 'entry' | 'mid' | 'senior' | 'executive';
+  categoryId?: number;
+  applicationDeadline?: string;
+  startDate?: string;
+  skills?: number[];
 }
 
 export interface CreateApplicationRequest {
@@ -276,16 +311,27 @@ export interface UpdateApplicationRequest {
   notes?: string;
 }
 
+export interface CreateJobCategoryRequest {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateJobCategoryRequest {
+  name?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
 // Auth types
 export interface AuthUser {
   id: number;
   email: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   role: User['role'];
   avatar_url?: string;
-  is_active: boolean;
-  is_verified: boolean;
+  isActive: boolean;
+  isVerified: boolean;
 }
 
 export interface JWTPayload {
@@ -298,13 +344,57 @@ export interface JWTPayload {
 
 // Query types
 export interface JobFilters {
-  category_id?: number;
-  job_type?: Job['job_type'];
-  location_type?: Job['location_type'];
-  experience_level?: Job['experience_level'];
+  categoryId?: number;
+  jobType?: 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
+  locationType?: 'remote' | 'on-site' | 'hybrid';
+  experienceLevel?: 'entry' | 'mid' | 'senior' | 'executive';
+  location?: string;
   search?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  limit?: number;
+  offset?: number;
   is_active?: boolean;
   is_featured?: boolean;
+}
+
+export interface CreateJobData {
+  employerId: number;
+  title: string;
+  description: string;
+  requirements?: string;
+  responsibilities?: string;
+  benefits?: string;
+  jobType: 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
+  locationType: 'remote' | 'on-site' | 'hybrid';
+  location?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  experienceLevel: 'entry' | 'mid' | 'senior' | 'executive';
+  categoryId?: number;
+  applicationDeadline?: Date;
+  startDate?: Date;
+}
+
+export interface UpdateJobData {
+  title?: string;
+  description?: string;
+  requirements?: string;
+  responsibilities?: string;
+  benefits?: string;
+  jobType?: 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
+  locationType?: 'remote' | 'on-site' | 'hybrid';
+  location?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  experienceLevel?: 'entry' | 'mid' | 'senior' | 'executive';
+  categoryId?: number;
+  applicationDeadline?: Date;
+  startDate?: Date;
+  isActive?: boolean;
+  isFeatured?: boolean;
 }
 
 export interface PaginationParams {

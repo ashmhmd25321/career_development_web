@@ -1,15 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
 import { Header } from './components/layout';
+import { JobPostingForm } from './components/jobs';
 import { 
   Users, 
   Target, 
   TrendingUp, 
   Star, 
-  Sparkles
+  Sparkles,
+  Briefcase
 } from 'lucide-react';
 import './styles/theme.css';
 
@@ -23,12 +25,13 @@ function App() {
             <Header />
 
             {/* Main Content */}
-            <main className="container-custom py-8 md:py-12">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<AboutPage />} />
-              </Routes>
-            </main>
+                <main className="container-custom py-8 md:py-12">
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/jobs" element={<JobsPage />} />
+                  </Routes>
+                </main>
 
             {/* Enhanced Responsive Footer */}
             <footer className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-12 md:py-16 mt-16 md:mt-20">
@@ -366,5 +369,94 @@ const AboutPage: React.FC = () => {
     </div>
   );
 };
+
+    const JobsPage: React.FC = () => {
+      const [showJobForm, setShowJobForm] = React.useState(false);
+      const { user } = useAuth();
+
+      return (
+        <div className="space-y-8">
+          {/* Header */}
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center">
+                <Briefcase className="w-8 h-8 text-white" />
+              </div>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-4">
+              Job Management
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Manage your job postings and discover new opportunities
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-center space-x-4">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => setShowJobForm(true)}
+              className="px-8 py-4"
+            >
+              Post New Job
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="px-8 py-4"
+            >
+              Browse Jobs
+            </Button>
+          </div>
+
+          {/* Demo Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <h3 className="text-xl font-semibold text-gray-900">Recent Jobs</h3>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  View and manage your recent job postings. Edit, update, or remove jobs as needed.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <h3 className="text-xl font-semibold text-gray-900">Applications</h3>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Track applications received for your job postings and manage the hiring process.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <h3 className="text-xl font-semibold text-gray-900">Analytics</h3>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  View detailed analytics about your job postings, views, and application rates.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Job Posting Form Modal */}
+          <JobPostingForm
+            isOpen={showJobForm}
+            onClose={() => setShowJobForm(false)}
+            onSuccess={(job) => {
+              console.log('Job created successfully:', job);
+              setShowJobForm(false);
+            }}
+          />
+        </div>
+      );
+    };
 
 export default App;
