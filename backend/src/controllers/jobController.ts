@@ -15,12 +15,12 @@ export const jobController = {
         locationType: req.query.locationType as JobFilters['locationType'],
         experienceLevel: req.query.experienceLevel as JobFilters['experienceLevel'],
         categoryId: req.query.categoryId ? parseInt(req.query.categoryId as unknown as string) : undefined,
-        location: req.query.location as string,
-        search: req.query.search as string,
+        location: req.query.location && req.query.location !== '' ? req.query.location as string : undefined,
+        search: req.query.search && req.query.search !== '' ? req.query.search as string : undefined,
         salaryMin: req.query.salaryMin ? parseFloat(req.query.salaryMin as unknown as string) : undefined,
         salaryMax: req.query.salaryMax ? parseFloat(req.query.salaryMax as unknown as string) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as unknown as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as unknown as string) : undefined,
+        limit: req.query.limit ? parseInt(req.query.limit as unknown as string) : 20,
+        offset: req.query.offset ? parseInt(req.query.offset as unknown as string) : 0,
       };
 
       const jobs = await jobService.findAll(filters);

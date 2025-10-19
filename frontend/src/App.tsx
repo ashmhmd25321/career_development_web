@@ -4,7 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
 import { Header } from './components/layout';
-import { JobPostingForm } from './components/jobs';
+import { JobPostingForm, JobListingPage } from './components/jobs';
 import { 
   Users, 
   Target, 
@@ -30,6 +30,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/jobs" element={<JobsPage />} />
+                    <Route path="/jobs/list" element={<JobListingPage />} />
                   </Routes>
                 </main>
 
@@ -404,6 +405,7 @@ const AboutPage: React.FC = () => {
             <Button
               variant="outline"
               size="lg"
+              onClick={() => window.location.href = '/jobs/list'}
               className="px-8 py-4"
             >
               Browse Jobs

@@ -36,6 +36,7 @@ const toCamelCase = (job: any): Job => {
 export const jobService = {
   async findAll(filters: JobFilters = {}): Promise<Job[]> {
     const connection = getConnection();
+    
     let query = `
       SELECT 
         j.id, j.employer_id, j.title, j.description, j.requirements, j.responsibilities, 
@@ -43,10 +44,8 @@ export const jobService = {
         j.salary_currency, j.experience_level, j.category_id, j.application_deadline, 
         j.start_date, j.is_active, j.is_featured, j.views_count, j.applications_count, 
         j.created_at, j.updated_at,
-        ep.company_name, ep.company_size, ep.industry, ep.logo_url,
         jc.name as category_name
       FROM jobs j
-      LEFT JOIN employer_profiles ep ON j.employer_id = ep.user_id
       LEFT JOIN job_categories jc ON j.category_id = jc.id
       WHERE j.is_active = TRUE
     `;
@@ -80,9 +79,9 @@ export const jobService = {
     }
     
     if (filters.search) {
-      query += ` AND (j.title LIKE ? OR j.description LIKE ? OR ep.company_name LIKE ?)`;
+      query += ` AND (j.title LIKE ? OR j.description LIKE ?)`;
       const searchTerm = `%${filters.search}%`;
-      queryParams.push(searchTerm, searchTerm, searchTerm);
+      queryParams.push(searchTerm, searchTerm);
     }
     
     if (filters.salaryMin) {
@@ -100,12 +99,10 @@ export const jobService = {
     
     // Apply pagination
     if (filters.limit) {
-      query += ` LIMIT ?`;
-      queryParams.push(filters.limit);
+      query += ` LIMIT ${filters.limit}`;
       
       if (filters.offset) {
-        query += ` OFFSET ?`;
-        queryParams.push(filters.offset);
+        query += ` OFFSET ${filters.offset}`;
       }
     }
     
