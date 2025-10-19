@@ -307,7 +307,7 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
                         <h3 className="text-xl font-bold text-gray-900 hover:text-primary-600 cursor-pointer">
                           {job.title}
                         </h3>
-                        {job.isFeatured && (
+                        {Boolean(job.isFeatured) && (
                           <Badge className="bg-yellow-100 text-yellow-800">
                             <Star className="w-3 h-3 mr-1" />
                             Featured
