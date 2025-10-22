@@ -120,20 +120,30 @@ export interface RegisterRequest {
 // Application types
 export interface Application {
   id: number;
+  userId: number;
   jobId: number;
-  studentId: number;
-  coverLetter?: string;
-  resumeUrl?: string;
-  status: 'pending' | 'reviewed' | 'shortlisted' | 'interview' | 'offered' | 'rejected' | 'withdrawn';
+  status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
   appliedAt: string;
-  reviewedAt?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  // Joined fields
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  jobTitle?: string;
+  companyName?: string;
+  location?: string;
+  jobType?: string;
+  experienceLevel?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  description?: string;
 }
 
-export interface CreateApplicationRequest {
+export interface CreateApplicationData {
   jobId: number;
-  coverLetter?: string;
-  resumeUrl?: string;
+  notes?: string;
 }

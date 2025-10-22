@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 // Database model types for Career Development Platform
 
 export interface User {
@@ -148,18 +150,42 @@ export interface JobSkill {
   created_at: Date;
 }
 
+export interface CreateApplicationData {
+  userId: number;
+  jobId: number;
+  status?: 'pending' | 'reviewed' | 'accepted' | 'rejected';
+  appliedAt?: Date;
+  notes?: string;
+}
+
+export interface UpdateApplicationData {
+  status?: 'pending' | 'reviewed' | 'accepted' | 'rejected';
+  notes?: string;
+}
+
 export interface Application {
   id: number;
-  job_id: number;
-  student_id: number;
-  cover_letter?: string;
-  resume_url?: string;
-  status: 'pending' | 'reviewed' | 'shortlisted' | 'interview' | 'offered' | 'rejected' | 'withdrawn';
-  applied_at: Date;
-  reviewed_at?: Date;
+  userId: number;
+  jobId: number;
+  status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
+  appliedAt: Date;
   notes?: string;
-  created_at: Date;
-  updated_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  // Joined fields
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  jobTitle?: string;
+  companyName?: string;
+  location?: string;
+  jobType?: string;
+  experienceLevel?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  description?: string;
 }
 
 export interface StudentSkill {
@@ -332,6 +358,10 @@ export interface AuthUser {
   avatar_url?: string;
   isActive: boolean;
   isVerified: boolean;
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: AuthUser;
 }
 
 export interface JWTPayload {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Card, CardHeader, CardContent, Input, Badge } from '../ui';
 import { jobService, jobCategoryService } from '../../services/jobService';
 import { Job, JobFilters, JobCategory } from '../../types';
@@ -21,6 +22,7 @@ interface JobListingPageProps {
 }
 
 export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }) => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [categories, setCategories] = useState<JobCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -382,7 +384,12 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
                   <Button variant="primary" className="whitespace-nowrap">
                     Apply Now
                   </Button>
-                  <Button variant="outline" size="sm" className="whitespace-nowrap">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="whitespace-nowrap"
+                    onClick={() => navigate(`/jobs/${job.id}`)}
+                  >
                     View Details
                   </Button>
                 </div>

@@ -51,6 +51,13 @@ export const Header: React.FC = () => {
                   Jobs
                 </Button>
               </Link>
+              {isAuthenticated && user?.role === 'student' && (
+                <Link to="/applications">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
+                    My Applications
+                  </Button>
+                </Link>
+              )}
               <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
                 Features
               </Button>
@@ -161,6 +168,18 @@ export const Header: React.FC = () => {
           {showMobileMenu && (
             <div className="lg:hidden border-t border-gray-200 py-4">
               <div className="flex flex-col space-y-2">
+                <Link to="/jobs">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
+                    Jobs
+                  </Button>
+                </Link>
+                {isAuthenticated && user?.role === 'student' && (
+                  <Link to="/applications">
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
+                      My Applications
+                    </Button>
+                  </Link>
+                )}
                 <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start">
                   Features
                 </Button>

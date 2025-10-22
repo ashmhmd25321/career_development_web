@@ -4,7 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
 import { Header } from './components/layout';
-import { JobPostingForm, JobListingPage } from './components/jobs';
+import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage } from './components/jobs';
 import { 
   Users, 
   Target, 
@@ -31,6 +31,8 @@ function App() {
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/jobs" element={<JobsPage />} />
                     <Route path="/jobs/list" element={<JobListingPage />} />
+                    <Route path="/jobs/:id" element={<JobDetailsPage />} />
+                    <Route path="/applications" element={<ApplicationTrackingPage />} />
                   </Routes>
                 </main>
 
