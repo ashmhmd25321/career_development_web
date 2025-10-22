@@ -4,7 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
 import { Header } from './components/layout';
-import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage } from './components/jobs';
+import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage, JobRecommendations } from './components/jobs';
 import { 
   Users, 
   Target, 
@@ -243,6 +243,17 @@ const HomePage: React.FC = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* Job Recommendations Section */}
+      <section className="py-12 md:py-20">
+        <div className="container-custom">
+          <JobRecommendations 
+            type="personalized" 
+            limit={6} 
+            className="mb-8"
+          />
         </div>
       </section>
 

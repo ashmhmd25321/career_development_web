@@ -41,6 +41,7 @@ export interface Job {
   categoryId?: number;
   applicationDeadline?: string;
   startDate?: string;
+  status: 'draft' | 'active' | 'paused' | 'closed' | 'expired';
   isActive: boolean;
   isFeatured: boolean;
   viewsCount: number;
@@ -72,6 +73,28 @@ export interface CreateJobData {
   categoryId?: number;
   applicationDeadline?: string;
   startDate?: string;
+  status?: Job['status'];
+}
+
+export interface UpdateJobData {
+  title?: string;
+  description?: string;
+  requirements?: string;
+  responsibilities?: string;
+  benefits?: string;
+  jobType?: Job['jobType'];
+  locationType?: Job['locationType'];
+  location?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  experienceLevel?: Job['experienceLevel'];
+  categoryId?: number;
+  applicationDeadline?: string;
+  startDate?: string;
+  status?: Job['status'];
+  isActive?: boolean;
+  isFeatured?: boolean;
 }
 
 export interface JobFilters {

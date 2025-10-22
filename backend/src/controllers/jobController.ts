@@ -377,4 +377,106 @@ export const jobController = {
       });
     }
   },
+
+  async updateJobStatus(req: AuthenticatedRequest<{ id: string }, any, { status: 'draft' | 'active' | 'paused' | 'closed' | 'expired' }>, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const jobId = parseInt(req.params.id);
+      const { status } = req.body;
+      const userId = req.user?.id;
+
+      if (isNaN(jobId)) {
+        res.status(400).json({
+          success: false,
+          error: { message: 'Invalid job ID' },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      if (!status || !['draft', 'active', 'paused', 'closed', 'expired'].includes(status)) {
+        res.status(400).json({
+          success: false,
+          error: { message: 'Invalid status. Must be one of: draft, active, paused, closed, expired' },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // Check if user owns this job (for employers) or is admin
+      const job = await jobService.findById(jobId);
+      if (!job) {
+        res.status(404).json({
+          success: false,
+          error: { message: 'Job not found' },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      if (req.user?.role !== 'admin' && job.employerId !== userId) {
+        res.status(403).json({
+          success: false,
+          error: { message: 'Not authorized to update this job' },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      const updatedJob = await jobService.updateJobStatus(jobId, status);
+
+      res.status(200).json({
+        success: true,
+        data: { job: updatedJob },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      logger.error('Failed to update job status:', error);
+      res.status(500).json({
+        success: false,
+        error: { message: 'Failed to update job status', code: 'UPDATE_JOB_STATUS_ERROR' },
+        timestamp: new Date().toISOString(),
+      });
+    }
+  },
+
+  async getJobsByStatus(req: AuthenticatedRequest<{}, any, any, { status?: 'draft' | 'active' | 'paused' | 'closed' | 'expired' }>, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      const { status } = req.query;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: { message: 'Authentication required' },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // Only employers and admins can access this endpoint
+      if (req.user?.role !== 'employer' && req.user?.role !== 'admin') {
+        res.status(403).json({
+          success: false,
+          error: { message: 'Access denied. Only employers and admins can view jobs by status' },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      const jobs = await jobService.findByEmployerIdAndStatus(userId, status);
+
+      res.status(200).json({
+        success: true,
+        data: { jobs },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      logger.error('Failed to fetch jobs by status:', error);
+      res.status(500).json({
+        success: false,
+        error: { message: 'Failed to fetch jobs by status', code: 'FETCH_JOBS_BY_STATUS_ERROR' },
+        timestamp: new Date().toISOString(),
+      });
+    }
+  },
 };

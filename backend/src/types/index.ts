@@ -127,6 +127,7 @@ export interface Job {
   categoryId?: number;
   applicationDeadline?: Date;
   startDate?: Date;
+  status: 'draft' | 'active' | 'paused' | 'closed' | 'expired';
   isActive: boolean;
   isFeatured: boolean;
   viewsCount: number;
@@ -429,6 +430,7 @@ export interface CreateJobData {
   categoryId?: number;
   applicationDeadline?: Date;
   startDate?: Date;
+  status?: 'draft' | 'active' | 'paused' | 'closed' | 'expired';
 }
 
 export interface UpdateJobData {
@@ -447,6 +449,7 @@ export interface UpdateJobData {
   categoryId?: number;
   applicationDeadline?: Date;
   startDate?: Date;
+  status?: 'draft' | 'active' | 'paused' | 'closed' | 'expired';
   isActive?: boolean;
   isFeatured?: boolean;
 }

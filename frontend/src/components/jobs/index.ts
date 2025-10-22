@@ -4,3 +4,6 @@ export * from './JobDetailsPage';
 export * from './JobApplicationForm';
 export * from './ApplicationTrackingPage';
 export * from './SavedJobsPage';
+export * from './JobRecommendations';
+export * from './JobShareModal';
+export * from './JobStatusManager';

@@ -4,6 +4,7 @@ import { Button, Card, CardHeader, CardContent, Badge } from '../ui';
 import { jobService } from '../../services/jobService';
 import { bookmarkService } from '../../services/bookmarkService';
 import { JobApplicationForm } from './JobApplicationForm';
+import { JobShareModal } from './JobShareModal';
 import { Job } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -38,6 +39,7 @@ export const JobDetailsPage: React.FC = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const loadJobDetails = useCallback(async () => {
     try {
@@ -92,16 +94,7 @@ export const JobDetailsPage: React.FC = () => {
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: job?.title,
-        text: job?.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      // TODO: Show toast notification
-    }
+    setShowShareModal(true);
   };
 
   const formatSalary = (min?: number, max?: number, currency = 'USD') => {
@@ -452,17 +445,26 @@ export const JobDetailsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Application Form Modal */}
-      {showApplicationForm && job && (
-        <JobApplicationForm
-          job={job}
-          onClose={() => setShowApplicationForm(false)}
-          onSuccess={() => {
-            // Refresh job data to update application count
-            loadJobDetails();
-          }}
-        />
-      )}
-    </div>
-  );
-};
+          {/* Application Form Modal */}
+          {showApplicationForm && job && (
+            <JobApplicationForm
+              job={job}
+              onClose={() => setShowApplicationForm(false)}
+              onSuccess={() => {
+                // Refresh job data to update application count
+                loadJobDetails();
+              }}
+            />
+          )}
+
+          {/* Share Modal */}
+          {showShareModal && job && (
+            <JobShareModal
+              show={showShareModal}
+              onClose={() => setShowShareModal(false)}
+              job={job}
+            />
+          )}
+        </div>
+      );
+    };

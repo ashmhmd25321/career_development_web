@@ -13,8 +13,10 @@ router.use(authenticateToken); // Apply authentication middleware to all routes 
 
 // Employer and Admin routes
 router.get('/employer/my-jobs', requireRole(['employer', 'admin']), jobController.getEmployerJobs);
+router.get('/employer/by-status', requireRole(['employer', 'admin']), jobController.getJobsByStatus);
 router.post('/', requireRole(['employer', 'admin']), jobController.createJob);
 router.put('/:id', jobController.updateJob); // Job owner or admin can update
+router.patch('/:id/status', jobController.updateJobStatus); // Job owner or admin can update status
 router.delete('/:id', jobController.deleteJob); // Job owner or admin can delete
 router.get('/employer/stats', requireRole(['employer', 'admin']), jobController.getJobStats);
 

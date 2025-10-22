@@ -126,6 +126,40 @@ export const jobService = {
       throw error;
     }
   },
+
+  // Update job status
+  async updateJobStatus(id: number, status: Job['status']): Promise<Job> {
+    try {
+      const response = await api.patch<ApiResponse<{ job: Job }>>(`/jobs/${id}/status`, {
+        status
+      });
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data.job;
+      }
+      throw new Error(response.data.error?.message || 'Failed to update job status');
+    } catch (error: any) {
+      console.error('Error updating job status:', error);
+      throw error;
+    }
+  },
+
+  // Get jobs by status (for employers)
+  async getJobsByStatus(status?: Job['status']): Promise<Job[]> {
+    try {
+      const response = await api.get<ApiResponse<{ jobs: Job[] }>>('/jobs/employer/by-status', {
+        params: status ? { status } : {}
+      });
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data.jobs;
+      }
+      throw new Error(response.data.error?.message || 'Failed to fetch jobs by status');
+    } catch (error: any) {
+      console.error('Error fetching jobs by status:', error);
+      throw error;
+    }
+  },
 };
 
 export const jobCategoryService = {

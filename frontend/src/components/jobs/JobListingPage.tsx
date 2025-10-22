@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent, Input, Badge } from '../ui';
 import { jobService, jobCategoryService } from '../../services/jobService';
 import { bookmarkService } from '../../services/bookmarkService';
+import { JobShareModal } from './JobShareModal';
 import { Job, JobFilters, JobCategory } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
@@ -16,7 +17,8 @@ import {
   Star,
   ChevronDown,
   X,
-  Heart
+  Heart,
+  Share2
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -33,6 +35,8 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<number>>(new Set());
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedJobForShare, setSelectedJobForShare] = useState<Job | null>(null);
   
   const [filters, setFilters] = useState<JobFilters>({
     search: '',
@@ -158,6 +162,11 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
     } catch (err) {
       console.error('Failed to toggle bookmark:', err);
     }
+  };
+
+  const handleShare = (job: Job) => {
+    setSelectedJobForShare(job);
+    setShowShareModal(true);
   };
 
   const getExperienceLevelColor = (level: string) => {
@@ -444,6 +453,14 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
                         <Heart className={cn("w-4 h-4", bookmarkedJobs.has(job.id) && "fill-current")} />
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleShare(job)}
+                      className="px-2"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -466,6 +483,18 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
             Clear All Filters
           </Button>
         </Card>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && selectedJobForShare && (
+        <JobShareModal
+          show={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedJobForShare(null);
+          }}
+          job={selectedJobForShare}
+        />
       )}
     </div>
   );

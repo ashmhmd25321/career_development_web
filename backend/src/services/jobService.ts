@@ -24,6 +24,7 @@ const toCamelCase = (job: any): Job => {
     categoryId: job.category_id,
     applicationDeadline: job.application_deadline,
     startDate: job.start_date,
+    status: job.status,
     isActive: job.is_active,
     isFeatured: job.is_featured,
     viewsCount: job.views_count,
@@ -42,12 +43,12 @@ export const jobService = {
         j.id, j.employer_id, j.title, j.description, j.requirements, j.responsibilities, 
         j.benefits, j.job_type, j.location_type, j.location, j.salary_min, j.salary_max, 
         j.salary_currency, j.experience_level, j.category_id, j.application_deadline, 
-        j.start_date, j.is_active, j.is_featured, j.views_count, j.applications_count, 
+        j.start_date, j.status, j.is_active, j.is_featured, j.views_count, j.applications_count, 
         j.created_at, j.updated_at,
         jc.name as category_name
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category_id = jc.id
-      WHERE j.is_active = TRUE
+      WHERE j.status = 'active'
     `;
     
     const queryParams: any[] = [];
@@ -117,14 +118,14 @@ export const jobService = {
         j.id, j.employer_id, j.title, j.description, j.requirements, j.responsibilities, 
         j.benefits, j.job_type, j.location_type, j.location, j.salary_min, j.salary_max, 
         j.salary_currency, j.experience_level, j.category_id, j.application_deadline, 
-        j.start_date, j.is_active, j.is_featured, j.views_count, j.applications_count, 
+        j.start_date, j.status, j.is_active, j.is_featured, j.views_count, j.applications_count, 
         j.created_at, j.updated_at,
         ep.company_name, ep.company_size, ep.industry, ep.logo_url, ep.website_url,
         jc.name as category_name
        FROM jobs j
        LEFT JOIN employer_profiles ep ON j.employer_id = ep.user_id
        LEFT JOIN job_categories jc ON j.category_id = jc.id
-       WHERE j.id = ? AND j.is_active = TRUE`,
+       WHERE j.id = ? AND j.status = 'active'`,
       [id]
     );
     
@@ -139,7 +140,7 @@ export const jobService = {
         j.id, j.employer_id, j.title, j.description, j.requirements, j.responsibilities, 
         j.benefits, j.job_type, j.location_type, j.location, j.salary_min, j.salary_max, 
         j.salary_currency, j.experience_level, j.category_id, j.application_deadline, 
-        j.start_date, j.is_active, j.is_featured, j.views_count, j.applications_count, 
+        j.start_date, j.status, j.is_active, j.is_featured, j.views_count, j.applications_count, 
         j.created_at, j.updated_at,
         ep.company_name, ep.company_size, ep.industry, ep.logo_url,
         jc.name as category_name
@@ -173,14 +174,15 @@ export const jobService = {
       categoryId,
       applicationDeadline,
       startDate,
+      status = 'draft',
     } = jobData;
 
     const [result] = await connection.execute<OkPacket>(
       `INSERT INTO jobs (
         employer_id, title, description, requirements, responsibilities, benefits,
         job_type, location_type, location, salary_min, salary_max, salary_currency,
-        experience_level, category_id, application_deadline, start_date, is_active, is_featured
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        experience_level, category_id, application_deadline, start_date, status, is_active, is_featured
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         employerId,
         title,
@@ -198,7 +200,8 @@ export const jobService = {
         categoryId || null,
         applicationDeadline || null,
         startDate || null,
-        true,
+        status,
+        status === 'active',
         false,
       ]
     );
@@ -277,6 +280,13 @@ export const jobService = {
       fields.push('start_date = ?');
       values.push(jobData.startDate);
     }
+    if (jobData.status !== undefined) {
+      fields.push('status = ?');
+      values.push(jobData.status);
+      // Update is_active based on status
+      fields.push('is_active = ?');
+      values.push(jobData.status === 'active');
+    }
     if (jobData.isActive !== undefined) {
       fields.push('is_active = ?');
       values.push(jobData.isActive);
@@ -297,6 +307,49 @@ export const jobService = {
 
     logger.info(`Job updated: ID ${id}`);
     return this.findById(id);
+  },
+
+  async updateJobStatus(id: number, status: 'draft' | 'active' | 'paused' | 'closed' | 'expired'): Promise<Job | null> {
+    const connection = getConnection();
+    
+    await connection.execute(
+      'UPDATE jobs SET status = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [status, status === 'active', id]
+    );
+
+    logger.info(`Job status updated: ID ${id}, Status ${status}`);
+    return this.findById(id);
+  },
+
+  async findByEmployerIdAndStatus(employerId: number, status?: 'draft' | 'active' | 'paused' | 'closed' | 'expired'): Promise<Job[]> {
+    const connection = getConnection();
+    
+    let query = `
+      SELECT 
+        j.id, j.employer_id, j.title, j.description, j.requirements, j.responsibilities, 
+        j.benefits, j.job_type, j.location_type, j.location, j.salary_min, j.salary_max, 
+        j.salary_currency, j.experience_level, j.category_id, j.application_deadline, 
+        j.start_date, j.status, j.is_active, j.is_featured, j.views_count, j.applications_count, 
+        j.created_at, j.updated_at,
+        ep.company_name, ep.company_size, ep.industry, ep.logo_url,
+        jc.name as category_name
+       FROM jobs j
+       LEFT JOIN employer_profiles ep ON j.employer_id = ep.user_id
+       LEFT JOIN job_categories jc ON j.category_id = jc.id
+       WHERE j.employer_id = ?
+    `;
+    
+    const params: any[] = [employerId];
+    
+    if (status) {
+      query += ' AND j.status = ?';
+      params.push(status);
+    }
+    
+    query += ' ORDER BY j.created_at DESC';
+    
+    const [rows] = await connection.execute<RowDataPacket[]>(query, params);
+    return rows.map(toCamelCase);
   },
 
   async deleteJob(id: number): Promise<boolean> {
