@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Job } from '@/types';
-import { jobService } from '@/services/jobService';
-import { toast } from 'react-hot-toast';
+import { Job } from '../../types';
+import { jobService } from '../../services/jobService';
 import { 
   Play, 
   Pause, 
@@ -19,7 +18,12 @@ interface JobStatusManagerProps {
   className?: string;
 }
 
-const statusConfig = {
+const statusConfig: Record<Job['status'], {
+  label: string;
+  color: string;
+  icon: React.ComponentType<any>;
+  description: string;
+}> = {
   draft: {
     label: 'Draft',
     color: 'text-gray-600 bg-gray-100',
@@ -70,10 +74,10 @@ export const JobStatusManager: React.FC<JobStatusManagerProps> = ({
     try {
       const updatedJob = await jobService.updateJobStatus(job.id, newStatus);
       onStatusUpdate(updatedJob);
-      toast.success(`Job status updated to ${statusConfig[newStatus].label}`);
+      alert(`Job status updated to ${statusConfig[newStatus].label}`);
       setShowStatusMenu(false);
     } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to update job status');
+      alert(error.response?.data?.error?.message || 'Failed to update job status');
     } finally {
       setIsUpdating(false);
     }

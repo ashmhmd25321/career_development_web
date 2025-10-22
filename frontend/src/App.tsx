@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
 import { Header } from './components/layout';
 import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage, JobRecommendations } from './components/jobs';
+import { AnalyticsDashboard } from './components/analytics';
 import { 
   Users, 
   Target, 
@@ -34,6 +35,7 @@ function App() {
                         <Route path="/jobs/:id" element={<JobDetailsPage />} />
                         <Route path="/applications" element={<ApplicationTrackingPage />} />
                         <Route path="/saved-jobs" element={<SavedJobsPage />} />
+                        <Route path="/analytics" element={<AnalyticsDashboard />} />
                   </Routes>
                 </main>
 

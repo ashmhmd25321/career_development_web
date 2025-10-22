@@ -403,7 +403,7 @@ export const jobController = {
       }
 
       // Check if user owns this job (for employers) or is admin
-      const job = await jobService.findById(jobId);
+      const job = await jobService.findByIdInternal(jobId);
       if (!job) {
         res.status(404).json({
           success: false,

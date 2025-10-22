@@ -133,6 +133,28 @@ export const jobService = {
     return toCamelCase(rows[0]);
   },
 
+  async findByIdInternal(id: number): Promise<Job | null> {
+    const connection = getConnection();
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT 
+        j.id, j.employer_id, j.title, j.description, j.requirements, j.responsibilities, 
+        j.benefits, j.job_type, j.location_type, j.location, j.salary_min, j.salary_max, 
+        j.salary_currency, j.experience_level, j.category_id, j.application_deadline, 
+        j.start_date, j.status, j.is_active, j.is_featured, j.views_count, j.applications_count, 
+        j.created_at, j.updated_at,
+        ep.company_name, ep.company_size, ep.industry, ep.logo_url, ep.website_url,
+        jc.name as category_name
+       FROM jobs j
+       LEFT JOIN employer_profiles ep ON j.employer_id = ep.user_id
+       LEFT JOIN job_categories jc ON j.category_id = jc.id
+       WHERE j.id = ?`,
+      [id]
+    );
+    
+    if (rows.length === 0) return null;
+    return toCamelCase(rows[0]);
+  },
+
   async findByEmployerId(employerId: number): Promise<Job[]> {
     const connection = getConnection();
     const [rows] = await connection.execute<RowDataPacket[]>(
@@ -206,7 +228,7 @@ export const jobService = {
       ]
     );
 
-    const newJob = await this.findById(result.insertId);
+    const newJob = await this.findByIdInternal(result.insertId);
     if (!newJob) {
       throw new Error('Failed to retrieve new job after creation.');
     }
@@ -297,7 +319,7 @@ export const jobService = {
     }
 
     if (fields.length === 0) {
-      return this.findById(id); // No fields to update
+      return this.findByIdInternal(id); // No fields to update
     }
 
     values.push(id);
@@ -306,7 +328,7 @@ export const jobService = {
     await connection.execute(query, values);
 
     logger.info(`Job updated: ID ${id}`);
-    return this.findById(id);
+    return this.findByIdInternal(id);
   },
 
   async updateJobStatus(id: number, status: 'draft' | 'active' | 'paused' | 'closed' | 'expired'): Promise<Job | null> {
@@ -318,7 +340,7 @@ export const jobService = {
     );
 
     logger.info(`Job status updated: ID ${id}, Status ${status}`);
-    return this.findById(id);
+    return this.findByIdInternal(id);
   },
 
   async findByEmployerIdAndStatus(employerId: number, status?: 'draft' | 'active' | 'paused' | 'closed' | 'expired'): Promise<Job[]> {
