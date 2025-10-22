@@ -4,7 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
 import { Header } from './components/layout';
-import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage } from './components/jobs';
+import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage } from './components/jobs';
 import { 
   Users, 
   Target, 
@@ -31,8 +31,9 @@ function App() {
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/jobs" element={<JobsPage />} />
                     <Route path="/jobs/list" element={<JobListingPage />} />
-                    <Route path="/jobs/:id" element={<JobDetailsPage />} />
-                    <Route path="/applications" element={<ApplicationTrackingPage />} />
+                        <Route path="/jobs/:id" element={<JobDetailsPage />} />
+                        <Route path="/applications" element={<ApplicationTrackingPage />} />
+                        <Route path="/saved-jobs" element={<SavedJobsPage />} />
                   </Routes>
                 </main>
 
@@ -375,7 +376,6 @@ const AboutPage: React.FC = () => {
 
     const JobsPage: React.FC = () => {
       const [showJobForm, setShowJobForm] = React.useState(false);
-      const { user } = useAuth();
 
       return (
         <div className="space-y-8">

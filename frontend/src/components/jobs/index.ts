@@ -3,3 +3,4 @@ export * from './JobListingPage';
 export * from './JobDetailsPage';
 export * from './JobApplicationForm';
 export * from './ApplicationTrackingPage';
+export * from './SavedJobsPage';

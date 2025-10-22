@@ -1,21 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, CardHeader, CardContent, Input, Badge } from '../ui';
+import { Button, Card, CardContent, Input, Badge } from '../ui';
 import { jobService, jobCategoryService } from '../../services/jobService';
+import { bookmarkService } from '../../services/bookmarkService';
 import { Job, JobFilters, JobCategory } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   Search, 
   Filter, 
   MapPin, 
   DollarSign, 
-  Clock, 
   Users, 
   Building,
   Calendar,
   Star,
   ChevronDown,
-  X
+  X,
+  Heart
 } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
 interface JobListingPageProps {
   className?: string;
@@ -23,11 +26,13 @@ interface JobListingPageProps {
 
 export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [categories, setCategories] = useState<JobCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<number>>(new Set());
   
   const [filters, setFilters] = useState<JobFilters>({
     search: '',
@@ -44,6 +49,7 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
   useEffect(() => {
     loadJobs();
     loadCategories();
+    loadBookmarkedJobs();
   }, []);
 
   // Load jobs when filters change
@@ -51,7 +57,7 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
     loadJobs();
   }, [filters]);
 
-  const loadJobs = async () => {
+  const loadJobs = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -63,16 +69,16 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const categoryList = await jobCategoryService.getCategories();
       setCategories(categoryList);
     } catch (err) {
       console.error('Failed to load categories:', err);
     }
-  };
+  }, []);
 
   const handleFilterChange = (key: keyof JobFilters, value: any) => {
     setFilters(prev => ({
@@ -119,6 +125,38 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
       case 'internship': return 'bg-orange-100 text-orange-800';
       case 'temporary': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const loadBookmarkedJobs = useCallback(async () => {
+    if (!user || user.role !== 'student') return;
+    
+    try {
+      const bookmarks = await bookmarkService.getUserBookmarks();
+      const bookmarkedIds = new Set(bookmarks.map(b => b.jobId));
+      setBookmarkedJobs(bookmarkedIds);
+    } catch (err) {
+      console.error('Failed to load bookmarked jobs:', err);
+    }
+  }, [user]);
+
+  const handleBookmark = async (jobId: number) => {
+    if (!user || user.role !== 'student') return;
+
+    try {
+      if (bookmarkedJobs.has(jobId)) {
+        await bookmarkService.deleteBookmarkByJobId(jobId);
+        setBookmarkedJobs(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(jobId);
+          return newSet;
+        });
+      } else {
+        await bookmarkService.createBookmark({ jobId });
+        setBookmarkedJobs(prev => new Set(prev).add(jobId));
+      }
+    } catch (err) {
+      console.error('Failed to toggle bookmark:', err);
     }
   };
 
@@ -348,15 +386,15 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
                     </div>
                     
                     <Badge className={getJobTypeColor(job.jobType)}>
-                      {job.jobType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      {job.jobType.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                     </Badge>
                     
                     <Badge className={getExperienceLevelColor(job.experienceLevel)}>
-                      {job.experienceLevel.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      {job.experienceLevel.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                     </Badge>
                     
                     <Badge className={getLocationTypeColor(job.locationType)}>
-                      {job.locationType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      {job.locationType.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                     </Badge>
                   </div>
 
@@ -384,14 +422,29 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
                   <Button variant="primary" className="whitespace-nowrap">
                     Apply Now
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="whitespace-nowrap"
-                    onClick={() => navigate(`/jobs/${job.id}`)}
-                  >
-                    View Details
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="whitespace-nowrap flex-1"
+                      onClick={() => navigate(`/jobs/${job.id}`)}
+                    >
+                      View Details
+                    </Button>
+                    {user && user.role === 'student' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleBookmark(job.id)}
+                        className={cn(
+                          "px-2",
+                          bookmarkedJobs.has(job.id) && "text-red-600 border-red-600"
+                        )}
+                      >
+                        <Heart className={cn("w-4 h-4", bookmarkedJobs.has(job.id) && "fill-current")} />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>

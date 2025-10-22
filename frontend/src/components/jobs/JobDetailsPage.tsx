@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardHeader, CardContent, Badge } from '../ui';
 import { jobService } from '../../services/jobService';
+import { bookmarkService } from '../../services/bookmarkService';
 import { JobApplicationForm } from './JobApplicationForm';
 import { Job } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   ArrowLeft,
   MapPin,
-  Briefcase,
   DollarSign,
   Users,
   Calendar,
@@ -30,34 +31,64 @@ import { cn } from '../../utils/cn';
 export const JobDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      loadJobDetails();
-    }
-  }, [id]);
-
-  const loadJobDetails = async () => {
+  const loadJobDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const jobData = await jobService.getJobById(parseInt(id!));
       setJob(jobData);
+      
+      // Check if job is bookmarked (only for authenticated students)
+      if (user && user.role === 'student') {
+        try {
+          const bookmarked = await bookmarkService.isBookmarked(jobData.id);
+          setIsBookmarked(bookmarked);
+        } catch (err) {
+          console.error('Failed to check bookmark status:', err);
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load job details');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user]);
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    // TODO: Implement bookmark functionality
+  useEffect(() => {
+    if (id) {
+      loadJobDetails();
+    }
+  }, [id, loadJobDetails]);
+
+  const handleBookmark = async () => {
+    if (!user || user.role !== 'student' || !job) {
+      return;
+    }
+
+    try {
+      setBookmarkLoading(true);
+      
+      if (isBookmarked) {
+        await bookmarkService.deleteBookmarkByJobId(job.id);
+        setIsBookmarked(false);
+      } else {
+        await bookmarkService.createBookmark({ jobId: job.id });
+        setIsBookmarked(true);
+      }
+    } catch (err: any) {
+      console.error('Failed to toggle bookmark:', err);
+      // You could show a toast notification here
+    } finally {
+      setBookmarkLoading(false);
+    }
   };
 
   const handleShare = () => {
@@ -204,18 +235,21 @@ export const JobDetailsPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 ml-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleBookmark}
-                    className={cn(
-                      "flex items-center gap-1",
-                      isBookmarked && "text-red-600 border-red-600"
-                    )}
-                  >
-                    <Heart className={cn("w-4 h-4", isBookmarked && "fill-current")} />
-                    {isBookmarked ? 'Saved' : 'Save'}
-                  </Button>
+                  {user && user.role === 'student' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleBookmark}
+                      disabled={bookmarkLoading}
+                      className={cn(
+                        "flex items-center gap-1",
+                        isBookmarked && "text-red-600 border-red-600"
+                      )}
+                    >
+                      <Heart className={cn("w-4 h-4", isBookmarked && "fill-current")} />
+                      {bookmarkLoading ? 'Saving...' : (isBookmarked ? 'Saved' : 'Save')}
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"

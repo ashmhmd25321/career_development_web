@@ -53,6 +53,7 @@ import authRoutes from '@/routes/auth';
 import jobRoutes from '@/routes/jobs';
 import jobCategoryRoutes from '@/routes/jobCategories';
 import applicationRoutes from '@/routes/applications';
+import bookmarkRoutes from '@/routes/bookmarks';
 
 app.get('/api', (req, res) => {
   res.json({
@@ -73,6 +74,9 @@ app.use('/api/job-categories', jobCategoryRoutes);
 
 // Application routes
 app.use('/api/applications', applicationRoutes);
+
+// Bookmark routes
+app.use('/api/bookmarks', bookmarkRoutes);
 
 // Error handling middleware
 app.use(notFound);

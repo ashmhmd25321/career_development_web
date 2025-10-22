@@ -147,3 +147,31 @@ export interface CreateApplicationData {
   jobId: number;
   notes?: string;
 }
+
+// Bookmark types
+export interface JobBookmark {
+  id: number;
+  userId: number;
+  jobId: number;
+  createdAt: string;
+  // Joined fields
+  jobTitle?: string;
+  companyName?: string;
+  location?: string;
+  jobType?: string;
+  experienceLevel?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  description?: string;
+  categoryName?: string;
+  isActive?: boolean;
+  applicationDeadline?: string;
+}
+
+export interface CreateBookmarkData {
+  jobId: number;
+}
+
+// Make this file a module
+export {};

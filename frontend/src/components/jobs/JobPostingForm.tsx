@@ -77,7 +77,7 @@ export const JobPostingForm: React.FC<JobPostingFormProps> = ({
   };
 
   const handleInputChange = (field: keyof CreateJobData, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev: CreateJobData) => ({
       ...prev,
       [field]: value
     }));

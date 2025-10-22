@@ -58,6 +58,13 @@ export const Header: React.FC = () => {
                   </Button>
                 </Link>
               )}
+              {isAuthenticated && user?.role === 'student' && (
+                <Link to="/saved-jobs">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
+                    Saved Jobs
+                  </Button>
+                </Link>
+              )}
               <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
                 Features
               </Button>
@@ -177,6 +184,13 @@ export const Header: React.FC = () => {
                   <Link to="/applications">
                     <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
                       My Applications
+                    </Button>
+                  </Link>
+                )}
+                {isAuthenticated && user?.role === 'student' && (
+                  <Link to="/saved-jobs">
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
+                      Saved Jobs
                     </Button>
                   </Link>
                 )}

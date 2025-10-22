@@ -188,6 +188,30 @@ export interface Application {
   description?: string;
 }
 
+export interface JobBookmark {
+  id: number;
+  userId: number;
+  jobId: number;
+  createdAt: Date;
+  // Joined fields
+  jobTitle?: string;
+  companyName?: string;
+  location?: string;
+  jobType?: string;
+  experienceLevel?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  description?: string;
+  categoryName?: string;
+  isActive?: boolean;
+  applicationDeadline?: Date;
+}
+
+export interface CreateBookmarkData {
+  jobId: number;
+}
+
 export interface StudentSkill {
   id: number;
   student_id: number;
