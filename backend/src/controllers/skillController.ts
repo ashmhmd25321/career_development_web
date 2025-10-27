@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { skillService } from '@/services/skillService';
 import { logger } from '@/utils/logger';
+import { AuthRequest } from '@/middleware/auth';
 
 export const skillController = {
   // Get all skills
@@ -49,9 +50,9 @@ export const skillController = {
   },
 
   // Get user's skills
-  async getUserSkills(req: Request, res: Response): Promise<Response> {
+  async getUserSkills(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const userId = parseInt(req.user?.id as string);
+      const userId = req.user?.id;
       
       if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -66,9 +67,9 @@ export const skillController = {
   },
 
   // Add a skill to user's profile
-  async addUserSkill(req: Request, res: Response): Promise<Response> {
+  async addUserSkill(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const userId = parseInt(req.user?.id as string);
+      const userId = req.user?.id;
       
       if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -83,9 +84,9 @@ export const skillController = {
   },
 
   // Update user's skill
-  async updateUserSkill(req: Request, res: Response): Promise<Response> {
+  async updateUserSkill(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const userId = parseInt(req.user?.id as string);
+      const userId = req.user?.id;
       const { skillId } = req.params;
       
       if (!userId) {
@@ -101,9 +102,9 @@ export const skillController = {
   },
 
   // Assess skill (mark as self-assessed)
-  async assessSkill(req: Request, res: Response): Promise<Response> {
+  async assessSkill(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const userId = parseInt(req.user?.id as string);
+      const userId = req.user?.id;
       const { skillId } = req.params;
       
       if (!userId) {
@@ -119,9 +120,9 @@ export const skillController = {
   },
 
   // Remove user's skill
-  async removeUserSkill(req: Request, res: Response): Promise<Response> {
+  async removeUserSkill(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const userId = parseInt(req.user?.id as string);
+      const userId = req.user?.id;
       const { skillId } = req.params;
       
       if (!userId) {
@@ -160,9 +161,9 @@ export const skillController = {
   },
 
   // Get recommended skills for user
-  async getRecommendedSkills(req: Request, res: Response): Promise<Response> {
+  async getRecommendedSkills(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const userId = parseInt(req.user?.id as string);
+      const userId = req.user?.id;
       
       if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });

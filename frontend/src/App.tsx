@@ -7,6 +7,7 @@ import { Header } from './components/layout';
 import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage, JobRecommendations } from './components/jobs';
 import { AnalyticsDashboard } from './components/analytics';
 import { ApplicationReviewPage, EmployerApplicationManagement } from './components/applications';
+import { SkillsManagementPage } from './components/career';
 import { 
   Users, 
   Target, 
@@ -39,6 +40,7 @@ function App() {
                         <Route path="/applications/employer" element={<EmployerApplicationManagement />} />
                         <Route path="/saved-jobs" element={<SavedJobsPage />} />
                         <Route path="/analytics" element={<AnalyticsDashboard />} />
+                        <Route path="/skills" element={<SkillsManagementPage />} />
                   </Routes>
                 </main>
 

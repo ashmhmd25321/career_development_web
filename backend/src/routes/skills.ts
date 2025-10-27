@@ -1,6 +1,6 @@
 import express from 'express';
 import { skillController } from '@/controllers/skillController';
-import { requireAuth, requireRole } from '@/middleware/auth';
+import { authenticateToken, requireRole } from '@/middleware/auth';
 
 const router = express.Router();
 
@@ -11,15 +11,15 @@ router.get('/category/:category', skillController.getSkillsByCategory);
 router.get('/:id', skillController.getSkillById);
 
 // Student routes
-router.get('/user/my-skills', requireAuth, skillController.getUserSkills);
-router.post('/user/add', requireAuth, skillController.addUserSkill);
-router.patch('/user/:skillId/update', requireAuth, skillController.updateUserSkill);
-router.patch('/user/:skillId/assess', requireAuth, skillController.assessSkill);
-router.delete('/user/:skillId/remove', requireAuth, skillController.removeUserSkill);
-router.get('/user/recommendations', requireAuth, skillController.getRecommendedSkills);
+router.get('/user/my-skills', authenticateToken, skillController.getUserSkills);
+router.post('/user/add', authenticateToken, skillController.addUserSkill);
+router.patch('/user/:skillId/update', authenticateToken, skillController.updateUserSkill);
+router.patch('/user/:skillId/assess', authenticateToken, skillController.assessSkill);
+router.delete('/user/:skillId/remove', authenticateToken, skillController.removeUserSkill);
+router.get('/user/recommendations', authenticateToken, skillController.getRecommendedSkills);
 
 // Admin routes
-router.post('/create', requireAuth, requireRole(['admin']), skillController.createSkill);
+router.post('/create', authenticateToken, requireRole(['admin']), skillController.createSkill);
 
 export default router;
 
