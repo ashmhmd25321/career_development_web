@@ -4,6 +4,7 @@ import { Button, Card, CardHeader, CardContent, Badge } from '../ui';
 import { applicationService } from '../../services/applicationService';
 import { Application } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { ApplicationDetailsModal } from '../applications';
 import {
   Briefcase,
   Calendar,
@@ -19,7 +20,8 @@ import {
   Building2,
   TrendingUp,
   Users,
-  Filter
+  Filter,
+  Info
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -30,6 +32,8 @@ export const ApplicationTrackingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -337,6 +341,17 @@ export const ApplicationTrackingPage: React.FC = () => {
                   
                   <div className="flex items-center gap-2">
                     <Button 
+                      variant="primary" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedApplication(application);
+                        setShowDetailsModal(true);
+                      }}
+                    >
+                      <Info className="w-4 h-4 mr-1" />
+                      View Timeline
+                    </Button>
+                    <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => navigate(`/jobs/${application.jobId}`)}
@@ -359,6 +374,18 @@ export const ApplicationTrackingPage: React.FC = () => {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Application Details Modal */}
+      {selectedApplication && (
+        <ApplicationDetailsModal
+          application={selectedApplication}
+          isOpen={showDetailsModal}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedApplication(null);
+          }}
+        />
       )}
     </div>
   );

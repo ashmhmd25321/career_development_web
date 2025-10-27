@@ -65,6 +65,20 @@ export const Header: React.FC = () => {
                   </Button>
                 </Link>
               )}
+              {isAuthenticated && (user?.role === 'employer' || user?.role === 'admin') && (
+                <Link to="/applications/employer">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
+                    Job Applications
+                  </Button>
+                </Link>
+              )}
+              {isAuthenticated && (user?.role === 'employer' || user?.role === 'admin') && (
+                <Link to="/analytics">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
+                    Analytics
+                  </Button>
+                </Link>
+              )}
               
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
@@ -185,6 +199,20 @@ export const Header: React.FC = () => {
                   <Link to="/saved-jobs">
                     <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
                       Saved Jobs
+                    </Button>
+                  </Link>
+                )}
+                {isAuthenticated && (user?.role === 'employer' || user?.role === 'admin') && (
+                  <Link to="/applications/employer">
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
+                      Job Applications
+                    </Button>
+                  </Link>
+                )}
+                {isAuthenticated && (user?.role === 'employer' || user?.role === 'admin') && (
+                  <Link to="/analytics">
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
+                      Analytics
                     </Button>
                   </Link>
                 )}

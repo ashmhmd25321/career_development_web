@@ -196,7 +196,7 @@ export const jobService = {
       categoryId,
       applicationDeadline,
       startDate,
-      status = 'draft',
+      status = 'active',
     } = jobData;
 
     const [result] = await connection.execute<OkPacket>(

@@ -6,7 +6,7 @@ import { Button, Card, CardHeader, CardContent, Input, Modal } from './component
 import { Header } from './components/layout';
 import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage, JobRecommendations } from './components/jobs';
 import { AnalyticsDashboard } from './components/analytics';
-import { ApplicationReviewPage } from './components/applications';
+import { ApplicationReviewPage, EmployerApplicationManagement } from './components/applications';
 import { 
   Users, 
   Target, 
@@ -36,6 +36,7 @@ function App() {
                         <Route path="/jobs/:id" element={<JobDetailsPage />} />
                         <Route path="/applications" element={<ApplicationTrackingPage />} />
                         <Route path="/applications/review/:id" element={<ApplicationReviewPage />} />
+                        <Route path="/applications/employer" element={<EmployerApplicationManagement />} />
                         <Route path="/saved-jobs" element={<SavedJobsPage />} />
                         <Route path="/analytics" element={<AnalyticsDashboard />} />
                   </Routes>
