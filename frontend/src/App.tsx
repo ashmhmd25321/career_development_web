@@ -1,11 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
 import { Header } from './components/layout';
 import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage, JobRecommendations } from './components/jobs';
 import { AnalyticsDashboard } from './components/analytics';
+import { ApplicationReviewPage } from './components/applications';
 import { 
   Users, 
   Target, 
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/jobs/list" element={<JobListingPage />} />
                         <Route path="/jobs/:id" element={<JobDetailsPage />} />
                         <Route path="/applications" element={<ApplicationTrackingPage />} />
+                        <Route path="/applications/review/:id" element={<ApplicationReviewPage />} />
                         <Route path="/saved-jobs" element={<SavedJobsPage />} />
                         <Route path="/analytics" element={<AnalyticsDashboard />} />
                   </Routes>
@@ -77,8 +79,6 @@ function App() {
                   <div>
                     <h4 className="text-lg font-semibold mb-4">Product</h4>
                     <ul className="space-y-2">
-                      <li><button className="text-gray-300 hover:text-white transition-colors">Features</button></li>
-                      <li><button className="text-gray-300 hover:text-white transition-colors">Pricing</button></li>
                       <li><button className="text-gray-300 hover:text-white transition-colors">API</button></li>
                       <li><button className="text-gray-300 hover:text-white transition-colors">Integrations</button></li>
                     </ul>

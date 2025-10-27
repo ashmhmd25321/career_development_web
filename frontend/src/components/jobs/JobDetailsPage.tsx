@@ -25,7 +25,8 @@ import {
   CheckCircle,
   AlertCircle,
   Info,
-  Zap
+  Zap,
+  FileText
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -334,33 +335,51 @@ export const JobDetailsPage: React.FC = () => {
           {/* Apply Now Card */}
           <Card className="sticky top-6">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">Apply for this position</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {user?.role === 'employer' || user?.role === 'admin' ? 'Job Management' : 'Apply for this position'}
+              </h3>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full"
-                onClick={() => setShowApplicationForm(true)}
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                Apply Now
-              </Button>
-              
-              <div className="text-sm text-gray-600 space-y-2">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span>Quick application process</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span>No account required</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-blue-600" />
-                  <span>{job.applicationsCount} people have applied</span>
-                </div>
-              </div>
+              {user?.role === 'employer' || user?.role === 'admin' ? (
+                // Employer View: View Applications Button
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => navigate(`/applications/review/${job.id}`)}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  View Applications ({job.applicationsCount})
+                </Button>
+              ) : (
+                // Student View: Apply Now Button
+                <>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
+                    onClick={() => setShowApplicationForm(true)}
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Apply Now
+                  </Button>
+                  
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>Quick application process</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>No account required</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Info className="w-4 h-4 text-blue-600" />
+                      <span>{job.applicationsCount} people have applied</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 

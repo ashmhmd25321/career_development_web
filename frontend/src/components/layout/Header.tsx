@@ -65,12 +65,6 @@ export const Header: React.FC = () => {
                   </Button>
                 </Link>
               )}
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
-                Features
-              </Button>
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
-                Pricing
-              </Button>
               
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
@@ -194,12 +188,6 @@ export const Header: React.FC = () => {
                     </Button>
                   </Link>
                 )}
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start">
-                  Features
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start">
-                  Pricing
-                </Button>
                 {isAuthenticated && (
                   <div className="pt-2 border-t border-gray-200">
                     <div className="flex items-center space-x-2 mb-2">
