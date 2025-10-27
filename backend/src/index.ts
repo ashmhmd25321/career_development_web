@@ -56,6 +56,7 @@ import applicationRoutes from '@/routes/applications';
 import bookmarkRoutes from '@/routes/bookmarks';
 import recommendationRoutes from '@/routes/recommendations';
 import analyticsRoutes from '@/routes/analytics';
+import skillsRoutes from '@/routes/skills';
 
 app.get('/api', (req, res) => {
   res.json({
@@ -85,6 +86,9 @@ app.use('/api/recommendations', recommendationRoutes);
 
 // Analytics routes
 app.use('/api/analytics', analyticsRoutes);
+
+// Skills routes
+app.use('/api/skills', skillsRoutes);
 
 // Error handling middleware
 app.use(notFound);
