@@ -7,7 +7,7 @@ import { Header } from './components/layout';
 import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage, JobRecommendations } from './components/jobs';
 import { AnalyticsDashboard } from './components/analytics';
 import { ApplicationReviewPage, EmployerApplicationManagement } from './components/applications';
-import { SkillsManagementPage } from './components/career';
+import { SkillsManagementPage, CareerPlanningPage, LearningDevelopmentPage } from './components/career';
 import { 
   Users, 
   Target, 
@@ -41,6 +41,8 @@ function App() {
                         <Route path="/saved-jobs" element={<SavedJobsPage />} />
                         <Route path="/analytics" element={<AnalyticsDashboard />} />
                         <Route path="/skills" element={<SkillsManagementPage />} />
+                        <Route path="/career-planning" element={<CareerPlanningPage />} />
+                        <Route path="/learning" element={<LearningDevelopmentPage />} />
                   </Routes>
                 </main>
 
