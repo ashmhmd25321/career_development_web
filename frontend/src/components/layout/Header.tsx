@@ -186,6 +186,13 @@ export const Header: React.FC = () => {
                   </Button>
                 </Link>
               )}
+              {isAuthenticated && user?.role === 'admin' && (
+                <Link to="/admin/dashboard">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
+                    Admin Dashboard
+                  </Button>
+                </Link>
+              )}
               
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
@@ -447,6 +454,13 @@ export const Header: React.FC = () => {
                   <Link to="/analytics">
                     <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
                       Analytics
+                    </Button>
+                  </Link>
+                )}
+                {isAuthenticated && user?.role === 'admin' && (
+                  <Link to="/admin/dashboard">
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
+                      Admin Dashboard
                     </Button>
                   </Link>
                 )}

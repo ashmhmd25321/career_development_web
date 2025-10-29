@@ -10,6 +10,7 @@ import { rateLimiter } from '@/middleware/rateLimiter';
 import { logger } from '@/utils/logger';
 import { connectDatabase } from '@/database/connection';
 import { notificationSchedulerService } from '@/services/notificationSchedulerService';
+import { scheduledReportService } from '@/services/scheduledReportService';
 
 // Load environment variables
 dotenv.config();
@@ -64,6 +65,7 @@ import learningRoutes from '@/routes/learning';
 import quizRoutes from '@/routes/quiz';
 import eventRoutes from '@/routes/event';
 import notificationRoutes from '@/routes/notification';
+import reportRoutes from '@/routes/reports';
 
 app.get('/api', (req, res) => {
   res.json({
@@ -112,6 +114,9 @@ app.use('/api/events', eventRoutes);
 // Notification routes
 app.use('/api/notifications', notificationRoutes);
 
+// Report routes
+app.use('/api/reports', reportRoutes);
+
 // Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
@@ -140,7 +145,20 @@ const startServer = async () => {
       }
     });
     
+    // Set up cron job to process scheduled reports (every hour)
+    cron.schedule('0 * * * *', async () => {
+      try {
+        const processedCount = await scheduledReportService.processScheduledReports();
+        if (processedCount > 0) {
+          logger.info(`📊 Processed ${processedCount} scheduled report(s)`);
+        }
+      } catch (error) {
+        logger.error('Error in scheduled reports cron job:', error);
+      }
+    });
+    
     logger.info('⏰ Scheduled notifications processor started (runs every minute)');
+    logger.info('📊 Scheduled reports processor started (runs every hour)');
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

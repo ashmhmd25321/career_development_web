@@ -14,6 +14,7 @@ import { NotificationPreferencesPage } from './components/settings/NotificationP
 import { ScheduledNotificationsPage } from './components/notifications/ScheduledNotificationsPage';
 import { NotificationAnalyticsPage } from './components/notifications/NotificationAnalyticsPage';
 import { NotificationTemplatesPage } from './components/notifications/NotificationTemplatesPage';
+import { AdminDashboardPage } from './components/admin/AdminDashboardPage';
 import { 
   Users, 
   Target, 
@@ -55,6 +56,7 @@ function App() {
                         <Route path="/settings/notifications/scheduled" element={<ScheduledNotificationsPage />} />
                         <Route path="/settings/notifications/analytics" element={<NotificationAnalyticsPage />} />
                         <Route path="/admin/notifications/templates" element={<NotificationTemplatesPage />} />
+                        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                   </Routes>
                 </main>
 
