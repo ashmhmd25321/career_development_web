@@ -222,6 +222,88 @@ export const eventController = {
       logger.error('Error getting attendees:', error);
       return res.status(500).json({ error: 'Failed to get attendees' });
     }
+  },
+
+  // Submit event feedback
+  submitFeedback: async (req: AuthRequest, res: Response): Promise<Response> => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      const { feedback, rating, attendance_status } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      if (!feedback || !rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: 'Feedback and rating (1-5) are required' });
+      }
+      
+      const result = await eventService.submitFeedback(
+        parseInt(id),
+        userId,
+        feedback,
+        rating,
+        attendance_status || 'attended'
+      );
+      
+      return res.json(result);
+    } catch (error: any) {
+      logger.error('Error submitting feedback:', error);
+      return res.status(500).json({ error: error.message || 'Failed to submit feedback' });
+    }
+  },
+
+  // Get event feedback
+  getEventFeedback: async (req: AuthRequest, res: Response): Promise<Response> => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      // Check if user is the organizer or an admin
+      const event = await eventService.getEventById(parseInt(id));
+      if (!event) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+      
+      const organizerId = (event.organizer_id === userId || req.user?.role === 'admin') ? event.organizer_id : undefined;
+      
+      const feedback = await eventService.getEventFeedback(parseInt(id), organizerId);
+      return res.json(feedback);
+    } catch (error: any) {
+      logger.error('Error getting feedback:', error);
+      return res.status(500).json({ error: error.message || 'Failed to get feedback' });
+    }
+  },
+
+  // Get event statistics
+  getEventStats: async (req: AuthRequest, res: Response): Promise<Response> => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      // Check if user is the organizer or an admin
+      const event = await eventService.getEventById(parseInt(id));
+      if (!event) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+      
+      const organizerId = (event.organizer_id === userId || req.user?.role === 'admin') ? event.organizer_id : undefined;
+      
+      const stats = await eventService.getEventStats(parseInt(id), organizerId);
+      return res.json(stats);
+    } catch (error: any) {
+      logger.error('Error getting event stats:', error);
+      return res.status(500).json({ error: error.message || 'Failed to get event statistics' });
+    }
   }
 };
 

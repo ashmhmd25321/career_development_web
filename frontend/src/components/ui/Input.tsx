@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface InputProps {
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date';
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'datetime-local';
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -14,6 +14,7 @@ export interface InputProps {
   className?: string;
   name?: string;
   id?: string;
+  step?: string;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -30,6 +31,7 @@ export const Input: React.FC<InputProps> = ({
   className = '',
   name,
   id,
+  step,
 }) => {
   const baseClasses = 'border border-gray-300 rounded-md px-3 py-2 text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder:text-gray-400 w-full';
   const errorClasses = error ? 'border-error-500 focus:ring-error-500 focus:border-error-500' : '';
@@ -60,6 +62,7 @@ export const Input: React.FC<InputProps> = ({
         name={name}
         id={id || name}
         className={classes}
+        step={step}
       />
       {error && (
         <p className="text-sm text-error-600 mt-1">

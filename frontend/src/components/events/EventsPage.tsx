@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Card, CardHeader, CardContent, Badge, Modal, Input } from '../ui';
 import { eventService, Event } from '../../services/eventService';
 import { useAuth } from '../../contexts/AuthContext';
+import EventFeedbackModal from './EventFeedbackModal';
 import {
   Calendar,
   MapPin,
@@ -14,7 +15,9 @@ import {
   Eye,
   Edit,
   Trash2,
-  Search
+  Search,
+  MessageSquare,
+  Star
 } from 'lucide-react';
 
 export const EventsPage: React.FC = () => {
@@ -25,6 +28,9 @@ export const EventsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackEvent, setFeedbackEvent] = useState<Event | null>(null);
+  const [userRegistrations, setUserRegistrations] = useState<Event[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -41,7 +47,17 @@ export const EventsPage: React.FC = () => {
 
   useEffect(() => {
     loadEvents();
+    loadUserRegistrations();
   }, []);
+
+  const loadUserRegistrations = async () => {
+    try {
+      const registrations = await eventService.getUserRegistrations();
+      setUserRegistrations(registrations);
+    } catch (err) {
+      console.error('Error loading user registrations:', err);
+    }
+  };
 
   const loadEvents = async () => {
     try {
@@ -259,25 +275,50 @@ export const EventsPage: React.FC = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  {event.is_registered ? (
-                    <Button
-                      variant="outline"
-                      onClick={() => handleCancelRegistration(event.id)}
-                      className="flex-1"
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      onClick={() => handleRegister(event.id)}
-                      className="flex-1"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Register
-                    </Button>
-                  )}
+                  {(() => {
+                    const isRegistered = event.is_registered;
+                    const registration = userRegistrations.find(r => r.id === event.id);
+                    const hasEnded = new Date(event.end_date) < new Date();
+                    const canGiveFeedback = isRegistered && hasEnded;
+
+                    if (canGiveFeedback) {
+                      return (
+                        <Button
+                          variant="primary"
+                          onClick={() => {
+                            setFeedbackEvent(event);
+                            setShowFeedbackModal(true);
+                          }}
+                          className="flex-1"
+                        >
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Give Feedback
+                        </Button>
+                      );
+                    } else if (isRegistered) {
+                      return (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleCancelRegistration(event.id)}
+                          className="flex-1"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Cancel
+                        </Button>
+                      );
+                    } else {
+                      return (
+                        <Button
+                          variant="primary"
+                          onClick={() => handleRegister(event.id)}
+                          className="flex-1"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Register
+                        </Button>
+                      );
+                    }
+                  })()}
                 </div>
               </CardContent>
             </Card>
@@ -286,11 +327,11 @@ export const EventsPage: React.FC = () => {
       )}
 
       {/* Create Event Modal */}
-      {showCreateModal && (
-        <Modal
-          title="Create New Event"
-          onClose={() => setShowCreateModal(false)}
-        >
+      <Modal
+        isOpen={showCreateModal}
+        title="Create New Event"
+        onClose={() => setShowCreateModal(false)}
+      >
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -456,6 +497,22 @@ export const EventsPage: React.FC = () => {
             </div>
           </div>
         </Modal>
+
+      {/* Feedback Modal */}
+      {feedbackEvent && (
+        <EventFeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={() => {
+            setShowFeedbackModal(false);
+            setFeedbackEvent(null);
+          }}
+          eventId={feedbackEvent.id}
+          eventTitle={feedbackEvent.title}
+          onSubmit={() => {
+            loadEvents();
+            loadUserRegistrations();
+          }}
+        />
       )}
     </div>
   );

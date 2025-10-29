@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../ui';
 import { useAuth } from '../../contexts/AuthContext';
 import { AuthModal } from '../auth';
@@ -16,6 +16,7 @@ import {
 
 export const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -129,6 +130,13 @@ export const Header: React.FC = () => {
                   </Button>
                 </Link>
               )}
+              {isAuthenticated && (user?.role === 'employer' || user?.role === 'admin') && (
+                <Link to="/events/analytics">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
+                    Event Analytics
+                  </Button>
+                </Link>
+              )}
               {isAuthenticated && user?.role === 'student' && (
                 <Link to="/skills">
                   <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
@@ -200,16 +208,43 @@ export const Header: React.FC = () => {
                     {/* Notification Dropdown */}
                     {showNotifications && (
                       <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto notification-dropdown">
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                          <h3 className="font-semibold text-gray-900">Notifications</h3>
-                          {notifications.length > 0 && (
-                            <button
-                              onClick={handleMarkAllAsRead}
-                              className="text-xs text-primary-600 hover:text-primary-800"
+                        <div className="p-4 border-b border-gray-200">
+                          <div className="flex justify-between items-center mb-2">
+                            <h3 className="font-semibold text-gray-900">Notifications</h3>
+                            {notifications.length > 0 && (
+                              <button
+                                onClick={handleMarkAllAsRead}
+                                className="text-xs text-primary-600 hover:text-primary-800"
+                              >
+                                Mark all as read
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <Link
+                              to="/settings/notifications"
+                              className="text-xs text-gray-600 hover:text-primary-600"
+                              onClick={() => setShowNotifications(false)}
                             >
-                              Mark all as read
-                            </button>
-                          )}
+                              Notification Settings →
+                            </Link>
+                            <Link
+                              to="/settings/notifications/analytics"
+                              className="text-xs text-gray-600 hover:text-primary-600"
+                              onClick={() => setShowNotifications(false)}
+                            >
+                              Notification Analytics →
+                            </Link>
+                            {user?.role === 'admin' && (
+                              <Link
+                                to="/admin/notifications/templates"
+                                className="text-xs text-gray-600 hover:text-primary-600"
+                                onClick={() => setShowNotifications(false)}
+                              >
+                                Notification Templates →
+                              </Link>
+                            )}
+                          </div>
                         </div>
                         {notifications.length === 0 ? (
                           <div className="p-8 text-center text-gray-500">
@@ -356,6 +391,13 @@ export const Header: React.FC = () => {
                   <Link to="/events">
                     <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
                       Events
+                    </Button>
+                  </Link>
+                )}
+                {isAuthenticated && (user?.role === 'employer' || user?.role === 'admin') && (
+                  <Link to="/events/analytics">
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
+                      Event Analytics
                     </Button>
                   </Link>
                 )}

@@ -1,5 +1,6 @@
 import { getConnection } from '../database/connection';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { notificationPreferencesService } from './notificationPreferencesService';
 
 export interface Notification {
   id: number;
@@ -63,8 +64,23 @@ export const notificationService = {
     return rows.length > 0 ? ({ ...rows[0] } as Notification) : null;
   },
 
-  // Create notification
-  async createNotification(notificationData: CreateNotificationData): Promise<Notification> {
+  // Create notification (with preferences check)
+  async createNotification(notificationData: CreateNotificationData): Promise<Notification | null> {
+    const type = notificationData.type || 'info';
+    const category = notificationData.category || 'system';
+    
+    // Check if user wants to receive this notification
+    const shouldSend = await notificationPreferencesService.shouldSendNotification(
+      notificationData.user_id,
+      type,
+      category,
+      'in_app' // We're creating in-app notifications
+    );
+    
+    if (!shouldSend) {
+      return null; // User has disabled this notification type/category
+    }
+    
     const connection = getConnection();
     
     const query = `
@@ -79,8 +95,8 @@ export const notificationService = {
         notificationData.user_id,
         notificationData.title,
         notificationData.message,
-        notificationData.type || 'info',
-        notificationData.category || 'system',
+        type,
+        category,
         notificationData.related_id || null
       ]
     );

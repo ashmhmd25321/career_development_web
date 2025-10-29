@@ -3,11 +3,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import cron from 'node-cron';
 import { errorHandler } from '@/middleware/errorHandler';
 import { notFound } from '@/middleware/notFound';
 import { rateLimiter } from '@/middleware/rateLimiter';
 import { logger } from '@/utils/logger';
 import { connectDatabase } from '@/database/connection';
+import { notificationSchedulerService } from '@/services/notificationSchedulerService';
 
 // Load environment variables
 dotenv.config();
@@ -125,6 +127,20 @@ const startServer = async () => {
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
     });
+    
+    // Set up cron job to process scheduled notifications (every minute)
+    cron.schedule('* * * * *', async () => {
+      try {
+        const sentCount = await notificationSchedulerService.processScheduledNotifications();
+        if (sentCount > 0) {
+          logger.info(`📬 Processed ${sentCount} scheduled notification(s)`);
+        }
+      } catch (error) {
+        logger.error('Error in scheduled notifications cron job:', error);
+      }
+    });
+    
+    logger.info('⏰ Scheduled notifications processor started (runs every minute)');
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

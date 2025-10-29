@@ -113,6 +113,43 @@ export const eventService = {
       headers: getAuthHeaders()
     });
     return response.data;
+  },
+
+  submitFeedback: async (eventId: number, feedback: string, rating: number, attendanceStatus: 'attended' | 'no_show' = 'attended'): Promise<any> => {
+    const response = await axios.post(
+      `${API_BASE_URL}/events/${eventId}/feedback`,
+      { feedback, rating, attendance_status: attendanceStatus },
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  getEventFeedback: async (eventId: number): Promise<any[]> => {
+    const response = await axios.get(`${API_BASE_URL}/events/${eventId}/feedback`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  },
+
+  getEventStats: async (eventId: number): Promise<any> => {
+    const response = await axios.get(`${API_BASE_URL}/events/${eventId}/stats`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  },
+
+  getOverallAnalytics: async (): Promise<any> => {
+    const response = await axios.get(`${API_BASE_URL}/events/analytics/overall`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  },
+
+  getOrganizerAnalytics: async (): Promise<any> => {
+    const response = await axios.get(`${API_BASE_URL}/events/analytics/organizer`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
   }
 };
 

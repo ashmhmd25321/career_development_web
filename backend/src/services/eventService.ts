@@ -401,6 +401,156 @@ export const eventService = {
         role: row.role
       }
     }));
+  },
+
+  // Submit event feedback
+  async submitFeedback(eventId: number, userId: number, feedback: string, rating: number, attendanceStatus: 'attended' | 'no_show' = 'attended'): Promise<EventRegistration> {
+    const connection = getConnection();
+    
+    // Check if user is registered for this event
+    const [existing] = await connection.execute<RowDataPacket[]>(
+      'SELECT * FROM event_registrations WHERE event_id = ? AND user_id = ?',
+      [eventId, userId]
+    );
+    
+    if (existing.length === 0) {
+      throw new Error('You must be registered for this event to submit feedback');
+    }
+    
+    // Check if event has ended
+    const [event] = await connection.execute<RowDataPacket[]>(
+      'SELECT end_date FROM events WHERE id = ?',
+      [eventId]
+    );
+    
+    if (event.length === 0) {
+      throw new Error('Event not found');
+    }
+    
+    if (new Date(event[0].end_date) > new Date()) {
+      throw new Error('Event has not ended yet. Feedback can only be submitted after the event ends.');
+    }
+    
+    // Update registration with feedback
+    await connection.execute(
+      'UPDATE event_registrations SET feedback = ?, rating = ?, attendance_status = ? WHERE event_id = ? AND user_id = ?',
+      [feedback, rating, attendanceStatus, eventId, userId]
+    );
+    
+    const updated = await this.getEventRegistrationByUser(eventId, userId);
+    if (!updated) {
+      throw new Error('Failed to retrieve feedback');
+    }
+    
+    return updated;
+  },
+
+  // Get event registration by user
+  async getEventRegistrationByUser(eventId: number, userId: number): Promise<EventRegistration | null> {
+    const connection = getConnection();
+    
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      'SELECT * FROM event_registrations WHERE event_id = ? AND user_id = ?',
+      [eventId, userId]
+    );
+    
+    return rows.length > 0 ? (rows[0] as EventRegistration) : null;
+  },
+
+  // Get event feedback (for organizers)
+  async getEventFeedback(eventId: number, organizerId?: number): Promise<any[]> {
+    const connection = getConnection();
+    
+    // Verify organizer if provided
+    if (organizerId) {
+      const [event] = await connection.execute<RowDataPacket[]>(
+        'SELECT organizer_id FROM events WHERE id = ?',
+        [eventId]
+      );
+      
+      if (event.length === 0) {
+        throw new Error('Event not found');
+      }
+      
+      if (event[0].organizer_id !== organizerId) {
+        throw new Error('Only the organizer can view feedback');
+      }
+    }
+    
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT 
+        er.*,
+        u.id as user_id,
+        u.email,
+        u.first_name,
+        u.last_name,
+        u.role
+       FROM event_registrations er
+       JOIN users u ON er.user_id = u.id
+       WHERE er.event_id = ? AND er.feedback IS NOT NULL
+       ORDER BY er.registration_date DESC`,
+      [eventId]
+    );
+    
+    return rows.map(row => ({
+      id: row.id,
+      event_id: row.event_id,
+      user_id: row.user_id,
+      registration_date: row.registration_date,
+      attendance_status: row.attendance_status,
+      feedback: row.feedback,
+      rating: row.rating,
+      user: {
+        id: row.user_id,
+        email: row.email,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        role: row.role
+      }
+    }));
+  },
+
+  // Get event statistics (for analytics)
+  async getEventStats(eventId: number, organizerId?: number): Promise<any> {
+    const connection = getConnection();
+    
+    // Verify organizer if provided
+    if (organizerId) {
+      const [event] = await connection.execute<RowDataPacket[]>(
+        'SELECT organizer_id FROM events WHERE id = ?',
+        [eventId]
+      );
+      
+      if (event.length === 0) {
+        throw new Error('Event not found');
+      }
+      
+      if (event[0].organizer_id !== organizerId) {
+        throw new Error('Only the organizer can view statistics');
+      }
+    }
+    
+    const [stats] = await connection.execute<RowDataPacket[]>(
+      `SELECT 
+        COUNT(*) as total_registrations,
+        COUNT(CASE WHEN attendance_status = 'attended' THEN 1 END) as attended_count,
+        COUNT(CASE WHEN attendance_status = 'no_show' THEN 1 END) as no_show_count,
+        COUNT(CASE WHEN feedback IS NOT NULL THEN 1 END) as feedback_count,
+        AVG(rating) as average_rating,
+        SUM(CASE WHEN attendance_status = 'attended' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as attendance_rate
+       FROM event_registrations
+       WHERE event_id = ?`,
+      [eventId]
+    );
+    
+    return {
+      total_registrations: stats[0].total_registrations || 0,
+      attended_count: stats[0].attended_count || 0,
+      no_show_count: stats[0].no_show_count || 0,
+      feedback_count: stats[0].feedback_count || 0,
+      average_rating: stats[0].average_rating ? parseFloat(stats[0].average_rating) : null,
+      attendance_rate: stats[0].attendance_rate ? parseFloat(stats[0].attendance_rate) : 0
+    };
   }
 };
 

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { eventController } from '../controllers/eventController';
+import { eventAnalyticsController } from '../controllers/eventAnalyticsController';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
@@ -21,6 +22,17 @@ router.delete('/:id/register', authenticateToken, eventController.cancelRegistra
 
 // Attendees route (organizer only)
 router.get('/:id/attendees', authenticateToken, eventController.getEventAttendees);
+
+// Feedback routes
+router.post('/:id/feedback', authenticateToken, eventController.submitFeedback);
+router.get('/:id/feedback', authenticateToken, eventController.getEventFeedback);
+
+// Statistics route (organizer/admin only)
+router.get('/:id/stats', authenticateToken, eventController.getEventStats);
+
+// Analytics routes
+router.get('/analytics/overall', authenticateToken, eventAnalyticsController.getOverallAnalytics);
+router.get('/analytics/organizer', authenticateToken, eventAnalyticsController.getOrganizerAnalytics);
 
 export default router;
 

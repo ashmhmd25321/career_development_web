@@ -9,6 +9,11 @@ import { AnalyticsDashboard } from './components/analytics';
 import { ApplicationReviewPage, EmployerApplicationManagement } from './components/applications';
 import { SkillsManagementPage, CareerPlanningPage, LearningDevelopmentPage } from './components/career';
 import { EventsPage } from './components/events/EventsPage';
+import { EventAnalyticsPage } from './components/events/EventAnalyticsPage';
+import { NotificationPreferencesPage } from './components/settings/NotificationPreferencesPage';
+import { ScheduledNotificationsPage } from './components/notifications/ScheduledNotificationsPage';
+import { NotificationAnalyticsPage } from './components/notifications/NotificationAnalyticsPage';
+import { NotificationTemplatesPage } from './components/notifications/NotificationTemplatesPage';
 import { 
   Users, 
   Target, 
@@ -45,6 +50,11 @@ function App() {
                         <Route path="/career-planning" element={<CareerPlanningPage />} />
                         <Route path="/learning" element={<LearningDevelopmentPage />} />
                         <Route path="/events" element={<EventsPage />} />
+                        <Route path="/events/analytics" element={<EventAnalyticsPage />} />
+                        <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
+                        <Route path="/settings/notifications/scheduled" element={<ScheduledNotificationsPage />} />
+                        <Route path="/settings/notifications/analytics" element={<NotificationAnalyticsPage />} />
+                        <Route path="/admin/notifications/templates" element={<NotificationTemplatesPage />} />
                   </Routes>
                 </main>
 
