@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui';
 import { useAuth } from '../../contexts/AuthContext';
 import { AuthModal } from '../auth';
+import { notificationService } from '../../services/notificationService';
 import { 
   Sparkles, 
   User, 
   LogOut,
   Menu,
-  X
+  X,
+  Bell,
+  Check
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -16,6 +19,9 @@ export const Header: React.FC = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
@@ -28,6 +34,71 @@ export const Header: React.FC = () => {
   const openAuthModal = (mode: 'login' | 'register') => {
     setAuthMode(mode);
     setShowAuthModal(true);
+  };
+
+  // Load notifications
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadNotifications();
+      const interval = setInterval(loadNotifications, 30000); // Refresh every 30 seconds
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
+
+  // Close notifications dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showNotifications && !(event.target as Element).closest('.notification-dropdown')) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showNotifications]);
+
+  const loadNotifications = async () => {
+    try {
+      const count = await notificationService.getUnreadCount();
+      setUnreadCount(count);
+      
+      if (showNotifications) {
+        const notifs = await notificationService.getNotifications();
+        setNotifications(notifs);
+      }
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
+  };
+
+  const handleToggleNotifications = async () => {
+    if (!showNotifications) {
+      try {
+        const notifs = await notificationService.getNotifications();
+        setNotifications(notifs);
+      } catch (error) {
+        console.error('Failed to load notifications:', error);
+      }
+    }
+    setShowNotifications(!showNotifications);
+  };
+
+  const handleMarkAsRead = async (notificationId: number) => {
+    try {
+      await notificationService.markAsRead(notificationId);
+      await loadNotifications();
+    } catch (error) {
+      console.error('Failed to mark as read:', error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      await loadNotifications();
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
   };
 
   return (
@@ -51,6 +122,13 @@ export const Header: React.FC = () => {
                   Jobs
                 </Button>
               </Link>
+              {isAuthenticated && (
+                <Link to="/events">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
+                    Events
+                  </Button>
+                </Link>
+              )}
               {isAuthenticated && user?.role === 'student' && (
                 <Link to="/skills">
                   <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600">
@@ -103,6 +181,71 @@ export const Header: React.FC = () => {
               
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
+                  {/* Notification Button */}
+                  <div className="relative notification-dropdown">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="relative"
+                      onClick={handleToggleNotifications}
+                    >
+                      <Bell className="w-4 h-4" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </Button>
+
+                    {/* Notification Dropdown */}
+                    {showNotifications && (
+                      <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto notification-dropdown">
+                        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                          <h3 className="font-semibold text-gray-900">Notifications</h3>
+                          {notifications.length > 0 && (
+                            <button
+                              onClick={handleMarkAllAsRead}
+                              className="text-xs text-primary-600 hover:text-primary-800"
+                            >
+                              Mark all as read
+                            </button>
+                          )}
+                        </div>
+                        {notifications.length === 0 ? (
+                          <div className="p-8 text-center text-gray-500">
+                            <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                            <p>No notifications</p>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-gray-100">
+                            {notifications.map((notification: any) => (
+                              <div
+                                key={notification.id}
+                                className={`p-4 hover:bg-gray-50 cursor-pointer ${!notification.is_read ? 'bg-blue-50' : ''}`}
+                                onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className={`text-sm font-medium ${!notification.is_read ? 'text-gray-900' : 'text-gray-700'}`}>
+                                      {notification.title}
+                                    </p>
+                                    <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                      {new Date(notification.created_at).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                  {!notification.is_read && (
+                                    <div className="ml-2 w-2 h-2 bg-blue-600 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   {/* User Menu */}
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-full flex items-center justify-center">
@@ -209,6 +352,13 @@ export const Header: React.FC = () => {
                     Jobs
                   </Button>
                 </Link>
+                {isAuthenticated && (
+                  <Link to="/events">
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">
+                      Events
+                    </Button>
+                  </Link>
+                )}
                 {isAuthenticated && user?.role === 'student' && (
                   <Link to="/skills">
                     <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary-600 justify-start w-full">

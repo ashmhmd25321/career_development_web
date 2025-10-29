@@ -60,6 +60,8 @@ import skillsRoutes from '@/routes/skills';
 import careerPlanningRoutes from '@/routes/careerPlanning';
 import learningRoutes from '@/routes/learning';
 import quizRoutes from '@/routes/quiz';
+import eventRoutes from '@/routes/event';
+import notificationRoutes from '@/routes/notification';
 
 app.get('/api', (req, res) => {
   res.json({
@@ -101,6 +103,12 @@ app.use('/api/learning', learningRoutes);
 
 // Quiz routes
 app.use('/api/quiz', quizRoutes);
+
+// Event routes
+app.use('/api/events', eventRoutes);
+
+// Notification routes
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use(notFound);

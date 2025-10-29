@@ -8,6 +8,7 @@ import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage
 import { AnalyticsDashboard } from './components/analytics';
 import { ApplicationReviewPage, EmployerApplicationManagement } from './components/applications';
 import { SkillsManagementPage, CareerPlanningPage, LearningDevelopmentPage } from './components/career';
+import { EventsPage } from './components/events/EventsPage';
 import { 
   Users, 
   Target, 
@@ -43,6 +44,7 @@ function App() {
                         <Route path="/skills" element={<SkillsManagementPage />} />
                         <Route path="/career-planning" element={<CareerPlanningPage />} />
                         <Route path="/learning" element={<LearningDevelopmentPage />} />
+                        <Route path="/events" element={<EventsPage />} />
                   </Routes>
                 </main>
 
