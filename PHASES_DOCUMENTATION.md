@@ -405,7 +405,7 @@ A comprehensive web application for internship and career development management
 ### Admin Features
 - User management
 - System configuration
-- Analytics and reporting
+- Analytics
 - Content management
 - Event management
 - Notification management
