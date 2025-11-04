@@ -1,20 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
 import { Header } from './components/layout';
 import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage, JobRecommendations } from './components/jobs';
-import { AnalyticsDashboard } from './components/analytics';
+import { ProfilePage } from './components/profile/ProfilePage';
 import { ApplicationReviewPage, EmployerApplicationManagement } from './components/applications';
 import { SkillsManagementPage, CareerPlanningPage, LearningDevelopmentPage } from './components/career';
 import { EventsPage } from './components/events/EventsPage';
 import { EventAnalyticsPage } from './components/events/EventAnalyticsPage';
-import { NotificationPreferencesPage } from './components/settings/NotificationPreferencesPage';
-import { ScheduledNotificationsPage } from './components/notifications/ScheduledNotificationsPage';
-import { NotificationAnalyticsPage } from './components/notifications/NotificationAnalyticsPage';
-import { NotificationTemplatesPage } from './components/notifications/NotificationTemplatesPage';
 import { AdminDashboardPage } from './components/admin/AdminDashboardPage';
+import { UserManagementPage } from './components/admin/UserManagementPage';
 import { 
   Users, 
   Target, 
@@ -46,17 +43,15 @@ function App() {
                         <Route path="/applications/review/:id" element={<ApplicationReviewPage />} />
                         <Route path="/applications/employer" element={<EmployerApplicationManagement />} />
                         <Route path="/saved-jobs" element={<SavedJobsPage />} />
-                        <Route path="/analytics" element={<AnalyticsDashboard />} />
-                        <Route path="/skills" element={<SkillsManagementPage />} />
+                    {/* Skills route temporarily hidden */}
+                    {/* <Route path="/skills" element={<SkillsManagementPage />} /> */}
+                    <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/career-planning" element={<CareerPlanningPage />} />
                         <Route path="/learning" element={<LearningDevelopmentPage />} />
                         <Route path="/events" element={<EventsPage />} />
                         <Route path="/events/analytics" element={<EventAnalyticsPage />} />
-                        <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
-                        <Route path="/settings/notifications/scheduled" element={<ScheduledNotificationsPage />} />
-                        <Route path="/settings/notifications/analytics" element={<NotificationAnalyticsPage />} />
-                        <Route path="/admin/notifications/templates" element={<NotificationTemplatesPage />} />
                         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                        <Route path="/admin/users" element={<UserManagementPage />} />
                   </Routes>
                 </main>
 
@@ -278,68 +273,6 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Enhanced CTA Section */}
-      <section className="relative py-12 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-600/10 to-secondary-600/10 rounded-3xl"></div>
-        <div className="relative z-10 text-center px-4">
-          <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6">
-            Ready to Transform Your Career?
-          </h3>
-          <p className="text-lg md:text-xl text-gray-600 mb-8 md:mb-12 max-w-2xl mx-auto">
-            Join thousands of professionals who have already started their journey with CareerFlow Pro
-          </p>
-          
-          <div className="max-w-md mx-auto">
-            <Card className="p-6 md:p-8">
-              <div className="flex items-center mb-4 md:mb-6">
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center">
-                  <Star className="w-6 h-6 md:w-8 md:h-8 text-white" />
-                </div>
-              </div>
-              <CardHeader>
-                <h4 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
-                  Get Started Today
-                </h4>
-                <p className="text-gray-600 text-base md:text-lg">
-                  Create your account and start your career journey
-                </p>
-              </CardHeader>
-              <CardContent>
-                <form className="space-y-4 md:space-y-6">
-                  <Input
-                    type="text"
-                    placeholder="Enter your full name"
-                    label="Full Name"
-                    required
-                    className="text-base md:text-lg"
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    label="Email Address"
-                    required
-                    className="text-base md:text-lg"
-                  />
-                  <Input
-                    type="password"
-                    placeholder="Create a secure password"
-                    label="Password"
-                    required
-                    className="text-base md:text-lg"
-                  />
-                  <Button variant="primary" className="w-full py-3 md:py-4 text-base md:text-lg font-semibold" type="submit">
-                    Create Account
-                  </Button>
-                  <p className="text-xs md:text-sm text-gray-500 text-center">
-                    By signing up, you agree to our Terms of Service and Privacy Policy
-                  </p>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* Modal Demo */}
       <Modal
         isOpen={false}
@@ -407,7 +340,10 @@ const AboutPage: React.FC = () => {
 };
 
     const JobsPage: React.FC = () => {
+      const { user } = useAuth();
       const [showJobForm, setShowJobForm] = React.useState(false);
+      const isStudent = user?.role === 'student';
+      const isAdmin = user?.role === 'admin';
 
       return (
         <div className="space-y-8">
@@ -428,14 +364,16 @@ const AboutPage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex justify-center space-x-4">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => setShowJobForm(true)}
-              className="px-8 py-4"
-            >
-              Post New Job
-            </Button>
+            {!isStudent && !isAdmin && (
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => setShowJobForm(true)}
+                className="px-8 py-4"
+              >
+                Post New Job
+              </Button>
+            )}
             <Button
               variant="outline"
               size="lg"

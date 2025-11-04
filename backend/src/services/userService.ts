@@ -184,6 +184,17 @@ export class UserService {
         values.push(updateData.location);
       }
 
+      if (updateData.avatarUrl !== undefined) {
+        updateFields.push('avatar_url = ?');
+        // Allow null or empty string to clear the avatar
+        values.push(updateData.avatarUrl || null);
+      }
+
+      if (updateData.isActive !== undefined) {
+        updateFields.push('is_active = ?');
+        values.push(updateData.isActive);
+      }
+
       updateFields.push('updated_at = NOW()');
       values.push(userId);
 
@@ -298,6 +309,36 @@ export class UserService {
   }
 
   /**
+   * Get all users (admin only)
+   */
+  static async getAllUsers(): Promise<User[]> {
+    const connection = getConnection();
+    
+    try {
+      const [users] = await connection.query(
+        'SELECT * FROM users ORDER BY created_at DESC'
+      );
+
+      if (!Array.isArray(users)) {
+        return [];
+      }
+
+      return users.map((user: any) => {
+        // Remove sensitive data
+        delete user.password_hash;
+        delete user.email_verification_token;
+        delete user.password_reset_token;
+        delete user.password_reset_expires;
+
+        return this.formatUser(user);
+      });
+    } catch (error) {
+      logger.error('Error getting all users:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Format user data for response
    */
   private static formatUser(user: any): User {
@@ -310,8 +351,9 @@ export class UserService {
       phone: user.phone,
       bio: user.bio,
       location: user.location,
-      isActive: user.is_active,
-      isVerified: user.is_verified,
+      avatarUrl: user.avatar_url,
+      isActive: Boolean(user.is_active),
+      isVerified: Boolean(user.is_verified),
       createdAt: user.created_at,
       updatedAt: user.updated_at
     };

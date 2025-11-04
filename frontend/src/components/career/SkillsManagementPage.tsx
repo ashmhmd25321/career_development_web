@@ -224,10 +224,12 @@ const SkillsManagementPage: React.FC = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-3">
-                    <Badge variant="secondary" className={proficiencyColors[skill.userSkill?.proficiencyLevel || 'Beginner']}>
-                      {skill.userSkill?.proficiencyLevel}
-                    </Badge>
-                    {skill.category && (
+                    {skill.userSkill?.proficiencyLevel && (
+                      <Badge variant="secondary" className={proficiencyColors[skill.userSkill.proficiencyLevel] || proficiencyColors['Beginner']}>
+                        {skill.userSkill.proficiencyLevel}
+                      </Badge>
+                    )}
+                    {skill.category && skill.category.trim() !== '' && (
                       <Badge variant="outline">{skill.category}</Badge>
                     )}
                     {skill.userSkill?.certified && (
@@ -244,7 +246,7 @@ const SkillsManagementPage: React.FC = () => {
                   </div>
 
                   <div className="text-sm text-gray-600 mb-3">
-                    <p>Experience: {skill.userSkill?.experienceYears || 0} year(s)</p>
+                    <p>Experience: {skill.userSkill?.experienceYears ? `${Number(skill.userSkill.experienceYears).toFixed(1)} year(s)` : 'No experience yet'}</p>
                     {skill.userSkill?.certificationDate && (
                       <p>Certified: {new Date(skill.userSkill.certificationDate).toLocaleDateString()}</p>
                     )}
@@ -341,12 +343,14 @@ const SkillsManagementPage: React.FC = () => {
                       <p className="text-sm text-gray-600 mb-3">{skill.description}</p>
                     )}
                     <div className="flex flex-wrap gap-2">
-                      {skill.category && (
+                      {skill.category && skill.category.trim() !== '' && (
                         <Badge variant="outline">{skill.category}</Badge>
                       )}
-                      <Badge variant="secondary" className={proficiencyColors[skill.difficultyLevel]}>
-                        {skill.difficultyLevel}
-                      </Badge>
+                      {skill.difficultyLevel && skill.difficultyLevel.trim() !== '' && (
+                        <Badge variant="secondary" className={proficiencyColors[skill.difficultyLevel] || proficiencyColors['Beginner']}>
+                          {skill.difficultyLevel}
+                        </Badge>
+                      )}
                     </div>
                   </Card>
                 </div>
@@ -357,24 +361,67 @@ const SkillsManagementPage: React.FC = () => {
       </Card>
 
       {/* Add Skill Modal */}
-      {showAddModal && selectedSkill && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md m-4">
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => {
+          setShowAddModal(false);
+          setSelectedSkill(null);
+          setFormData({
+            proficiencyLevel: 'Beginner',
+            experienceYears: 0,
+            certified: false,
+            notes: '',
+          });
+        }}>
+          <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+            <Card className="w-full max-w-md m-4">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-gray-900">Add Skill</h3>
-                <Button variant="ghost" size="sm" onClick={() => setShowAddModal(false)}>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setShowAddModal(false);
+                  setSelectedSkill(null);
+                  setFormData({
+                    proficiencyLevel: 'Beginner',
+                    experienceYears: 0,
+                    certified: false,
+                    notes: '',
+                  });
+                }}>
                   ×
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <p className="text-lg font-semibold text-gray-900 mb-2">{selectedSkill.name}</p>
-                {selectedSkill.description && (
-                  <p className="text-sm text-gray-600">{selectedSkill.description}</p>
-                )}
-              </div>
+              {!selectedSkill ? (
+                <div className="space-y-4">
+                  <p className="text-gray-600">Select a skill to add:</p>
+                  <div className="max-h-64 overflow-y-auto space-y-2">
+                    {filteredSkills.length === 0 ? (
+                      <p className="text-gray-500 text-center py-4">No skills available to add. Try adjusting your search or filters.</p>
+                    ) : (
+                      filteredSkills.map(skill => (
+                        <div
+                          key={skill.id}
+                          onClick={() => setSelectedSkill(skill)}
+                          className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        >
+                          <p className="font-semibold text-gray-900">{skill.name}</p>
+                          {skill.description && (
+                            <p className="text-sm text-gray-600">{skill.description}</p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900 mb-2">{selectedSkill.name}</p>
+                    {selectedSkill.description && (
+                      <p className="text-sm text-gray-600">{selectedSkill.description}</p>
+                    )}
+                  </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -443,27 +490,45 @@ const SkillsManagementPage: React.FC = () => {
                 />
               </div>
 
-              <div className="flex space-x-4">
-                <Button
-                  variant="primary"
-                  onClick={handleAddSkill}
-                  className="flex-1"
-                >
-                  Add Skill
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowAddModal(false);
-                    setSelectedSkill(null);
-                  }}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
+                  <div className="flex space-x-4">
+                    <Button
+                      variant="primary"
+                      onClick={handleAddSkill}
+                      className="flex-1"
+                    >
+                      Add Skill
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedSkill(null);
+                      }}
+                      className="flex-1"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowAddModal(false);
+                        setSelectedSkill(null);
+                        setFormData({
+                          proficiencyLevel: 'Beginner',
+                          experienceYears: 0,
+                          certified: false,
+                          notes: '',
+                        });
+                      }}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
+          </div>
         </div>
       )}
     </div>

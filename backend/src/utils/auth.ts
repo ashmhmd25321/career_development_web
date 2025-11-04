@@ -12,8 +12,8 @@ interface TokenPayload {
 export class AuthUtils {
   private static readonly JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
   private static readonly JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret';
-  private static readonly ACCESS_TOKEN_EXPIRY = '15m';
-  private static readonly REFRESH_TOKEN_EXPIRY = '7d';
+  private static readonly ACCESS_TOKEN_EXPIRY = '7d';
+  private static readonly REFRESH_TOKEN_EXPIRY = '30d';
 
   /**
    * Generate access token
@@ -62,8 +62,8 @@ export class AuthUtils {
     const accessToken = this.generateAccessToken(userId, email, role);
     const refreshToken = this.generateRefreshToken(userId, email, role);
     
-    // Calculate expiry time in seconds (15 minutes = 900 seconds)
-    const expiresIn = 15 * 60;
+    // Calculate expiry time in seconds (7 days)
+    const expiresIn = 7 * 24 * 60 * 60;
 
     return {
       accessToken,

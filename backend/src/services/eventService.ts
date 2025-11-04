@@ -306,6 +306,15 @@ export const eventService = {
       throw new Error('Event is full');
     }
     
+    // Get user info for notification
+    const [userRows] = await connection.execute<RowDataPacket[]>(
+      'SELECT first_name, last_name FROM users WHERE id = ?',
+      [userId]
+    );
+    const registrantName = userRows.length > 0 
+      ? `${userRows[0].first_name} ${userRows[0].last_name}` 
+      : 'A user';
+    
     // Register user
     const [result] = await connection.execute<ResultSetHeader>(
       'INSERT INTO event_registrations (event_id, user_id, registration_date) VALUES (?, ?, NOW())',
@@ -315,6 +324,24 @@ export const eventService = {
     const registration = await this.getEventRegistration(result.insertId);
     if (!registration) {
       throw new Error('Failed to retrieve registration');
+    }
+    
+    // Create notification for event organizer (employer)
+    if (event.organizer_id) {
+      try {
+        const { notificationService } = await import('./notificationService');
+        await notificationService.createNotification({
+          user_id: event.organizer_id,
+          title: 'New Event Registration',
+          message: `${registrantName} has registered for your event "${event.title}".`,
+          type: 'info',
+          category: 'event',
+          related_id: eventId
+        });
+      } catch (error) {
+        // Log error but don't fail registration if notification fails
+        console.error('Error creating notification for event registration:', error);
+      }
     }
     
     return registration;

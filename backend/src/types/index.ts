@@ -11,6 +11,7 @@ export interface User {
   phone?: string;
   bio?: string;
   location?: string;
+  avatarUrl?: string;
   isActive: boolean;
   isVerified: boolean;
   createdAt: Date;
@@ -32,6 +33,8 @@ export interface UpdateUserData {
   phone?: string;
   bio?: string;
   location?: string;
+  avatarUrl?: string;
+  isActive?: boolean;
 }
 
 export interface StudentProfile {
@@ -329,6 +332,8 @@ export interface CreateJobRequest {
   applicationDeadline?: string;
   startDate?: string;
   skills?: number[];
+  // Optional company name to upsert employer profile
+  companyName?: string;
 }
 
 export interface UpdateJobRequest {

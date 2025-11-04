@@ -98,6 +98,25 @@ export const applicationService = {
       throw new Error('You have already applied for this job');
     }
 
+    // Validate user has contact details (phone number)
+    const [userRows] = await connection.execute(
+      'SELECT phone, email FROM users WHERE id = ?',
+      [applicationData.userId]
+    ) as any[];
+    
+    if (userRows.length === 0) {
+      throw new Error('User not found');
+    }
+    
+    const user = userRows[0];
+    if (!user.phone || user.phone.trim() === '') {
+      throw new Error('Phone number is required to submit an application. Please update your profile with your contact number.');
+    }
+    
+    if (!user.email || user.email.trim() === '') {
+      throw new Error('Email address is required to submit an application.');
+    }
+
     const query = `
       INSERT INTO applications (
         student_id, job_id, status, applied_at, notes, created_at, updated_at

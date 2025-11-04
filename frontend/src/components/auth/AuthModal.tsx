@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
@@ -17,6 +17,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onSuccess,
 }) => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
+
+  // Update mode when initialMode changes or modal opens
+  useEffect(() => {
+    if (isOpen && initialMode) {
+      setMode(initialMode);
+    }
+  }, [isOpen, initialMode]);
 
   const handleSuccess = () => {
     onSuccess?.();

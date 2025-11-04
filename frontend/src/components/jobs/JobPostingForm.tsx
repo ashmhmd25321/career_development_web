@@ -23,6 +23,7 @@ export const JobPostingForm: React.FC<JobPostingFormProps> = ({
   const [categories, setCategories] = useState<JobCategory[]>([]);
   const [formData, setFormData] = useState<CreateJobData>({
     title: '',
+    companyName: '',
     description: '',
     requirements: '',
     responsibilities: '',
@@ -154,6 +155,15 @@ export const JobPostingForm: React.FC<JobPostingFormProps> = ({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Company Name */}
+              <div>
+                <Input
+                  label="Company Name"
+                  placeholder="e.g., Acme Inc."
+                  value={formData.companyName || ''}
+                  onChange={(e) => handleInputChange('companyName', e.target.value)}
+                />
+              </div>
               <div className="md:col-span-2">
                 <Input
                   label="Job Title"

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { jobService } from '@/services/jobService';
+import { employerProfileService } from '@/services/employerProfileService';
 import { ApiResponse, AuthUser, CreateJobRequest, UpdateJobRequest, JobFilters } from '@/types';
 import { logger } from '@/utils/logger';
 
@@ -155,6 +156,7 @@ export const jobController = {
         categoryId,
         applicationDeadline,
         startDate,
+        companyName,
       } = req.body;
 
       // Basic validation
@@ -165,6 +167,11 @@ export const jobController = {
           timestamp: new Date().toISOString(),
         });
         return;
+      }
+
+      // If companyName provided, upsert employer profile to ensure join shows company
+      if (companyName && typeof companyName === 'string' && companyName.trim()) {
+        await employerProfileService.upsertCompanyName(req.user.id, companyName.trim());
       }
 
       const jobData = {

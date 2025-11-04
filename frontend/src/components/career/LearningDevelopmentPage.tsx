@@ -94,9 +94,22 @@ const LearningDevelopmentPage: React.FC = () => {
         
         // Mark as started or update progress
         try {
+          // Get current progress first
+          let currentProgress = 0;
+          try {
+            const existingProgress = await learningService.getUserProgress(resource.id);
+            currentProgress = Number(existingProgress.progressPercentage) || 0;
+          } catch {
+            // No progress exists, will start at 10%
+            currentProgress = 0;
+          }
+          
+          // If not started, initialize with 10%, otherwise keep current progress
+          const newProgress = currentProgress === 0 ? 10 : Math.min(100, currentProgress + 5);
+          
           await learningService.updateProgress(resource.id, {
-            status: 'In Progress',
-            progressPercentage: 10,
+            status: newProgress === 100 ? 'Completed' : 'In Progress',
+            progressPercentage: newProgress,
           });
           await loadData(); // Reload data to update statistics
         } catch (error) {
@@ -424,14 +437,72 @@ const LearningDevelopmentPage: React.FC = () => {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-gray-600">Progress</span>
                       <span className="text-sm font-semibold text-primary-600">
-                        {progress.progressPercentage}%
+                        {Math.round(Number(progress.progressPercentage) || 0)}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                       <div 
-                        className="bg-primary-600 h-2 rounded-full transition-all"
-                        style={{ width: `${progress.progressPercentage}%` }}
+                        className="bg-gradient-to-r from-primary-600 to-secondary-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                        style={{ 
+                          width: `${Math.min(100, Math.max(0, Number(progress.progressPercentage) || 0))}%` 
+                        }}
                       />
+                    </div>
+                    {/* Progress Update Buttons */}
+                    <div className="flex items-center gap-2 mt-3">
+                      <span className="text-xs text-gray-500">Update progress:</span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={async () => {
+                            const newProgress = Math.min(100, Math.max(0, Number(progress.progressPercentage || 0) + 25));
+                            try {
+                              await learningService.updateProgress(resource.id, {
+                                status: newProgress === 100 ? 'Completed' : 'In Progress',
+                                progressPercentage: newProgress,
+                              });
+                              await loadData();
+                            } catch (error) {
+                              console.error('Error updating progress:', error);
+                            }
+                          }}
+                          className="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded hover:bg-primary-200 transition-colors"
+                        >
+                          +25%
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const newProgress = Math.min(100, Math.max(0, Number(progress.progressPercentage || 0) + 50));
+                            try {
+                              await learningService.updateProgress(resource.id, {
+                                status: newProgress === 100 ? 'Completed' : 'In Progress',
+                                progressPercentage: newProgress,
+                              });
+                              await loadData();
+                            } catch (error) {
+                              console.error('Error updating progress:', error);
+                            }
+                          }}
+                          className="px-2 py-1 text-xs bg-secondary-100 text-secondary-700 rounded hover:bg-secondary-200 transition-colors"
+                        >
+                          +50%
+                        </button>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await learningService.updateProgress(resource.id, {
+                                status: 'Completed',
+                                progressPercentage: 100,
+                              });
+                              await loadData();
+                            } catch (error) {
+                              console.error('Error updating progress:', error);
+                            }
+                          }}
+                          className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
+                        >
+                          Complete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

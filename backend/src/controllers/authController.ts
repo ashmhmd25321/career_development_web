@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { UserService } from '@/services/userService';
+import { employerProfileService } from '@/services/employerProfileService';
 import { AuthUtils } from '@/utils/auth';
 import { logger } from '@/utils/logger';
 import { AuthRequest } from '@/middleware/auth';
@@ -283,10 +284,17 @@ export class AuthController {
         return;
       }
 
+      // Enrich with role-specific profile details
+      let employerProfile: any | undefined;
+      if (user.role === 'employer') {
+        employerProfile = await employerProfileService.getByUserId(user.id);
+      }
+
       res.json({
         success: true,
         data: {
-          user
+          user,
+          employerProfile,
         }
       });
     } catch (error) {
@@ -493,6 +501,108 @@ export class AuthController {
           message: 'Password reset failed',
           code: 'RESET_ERROR'
         }
+      });
+    }
+  }
+
+  /**
+   * Get all users (admin only)
+   */
+  static async getAllUsers(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          error: { message: 'User not authenticated' }
+        });
+        return;
+      }
+
+      if (req.user.role !== 'admin') {
+        res.status(403).json({
+          success: false,
+          error: { message: 'Access denied. Admin role required.' }
+        });
+        return;
+      }
+
+      const users = await UserService.getAllUsers();
+      
+      res.json({
+        success: true,
+        data: { users },
+        message: 'Users retrieved successfully'
+      });
+    } catch (error: any) {
+      logger.error('Error getting all users:', error);
+      res.status(500).json({
+        success: false,
+        error: { message: error.message || 'Failed to get users' }
+      });
+    }
+  }
+
+  /**
+   * Update user active status (admin only)
+   */
+  static async updateUserStatus(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          error: { message: 'User not authenticated' }
+        });
+        return;
+      }
+
+      if (req.user.role !== 'admin') {
+        res.status(403).json({
+          success: false,
+          error: { message: 'Access denied. Admin role required.' }
+        });
+        return;
+      }
+
+      const { userId } = req.params;
+      const { isActive } = req.body;
+
+      if (typeof isActive !== 'boolean') {
+        res.status(400).json({
+          success: false,
+          error: { message: 'isActive must be a boolean value' }
+        });
+        return;
+      }
+
+      // Prevent admin from deactivating themselves
+      if (parseInt(userId) === req.user.id && !isActive) {
+        res.status(400).json({
+          success: false,
+          error: { message: 'You cannot deactivate your own account' }
+        });
+        return;
+      }
+
+      const updatedUser = await UserService.updateUser(parseInt(userId), { isActive });
+      
+      if (!updatedUser) {
+        res.status(404).json({
+          success: false,
+          error: { message: 'User not found' }
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: { user: updatedUser },
+        message: `User ${isActive ? 'activated' : 'deactivated'} successfully`
+      });
+    } catch (error: any) {
+      logger.error('Error updating user status:', error);
+      res.status(500).json({
+        success: false,
+        error: { message: error.message || 'Failed to update user status' }
       });
     }
   }

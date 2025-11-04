@@ -54,8 +54,63 @@ const CareerPlanningPage: React.FC = () => {
     try {
       const milestonesData = await careerPlanningService.getGoalMilestones(goalId);
       setMilestones(milestonesData);
+      
+      // Calculate and update progress based on milestones
+      await calculateAndUpdateProgress(goalId, milestonesData);
     } catch (error) {
       console.error('Error loading milestones:', error);
+    }
+  };
+
+  // Calculate progress based on milestones and update goal
+  const calculateAndUpdateProgress = async (goalId: number, milestones: CareerMilestone[]) => {
+    try {
+      let progressPercentage = 0;
+      
+      if (milestones.length === 0) {
+        // No milestones = 0% progress
+        progressPercentage = 0;
+      } else {
+        // Calculate: (achieved milestones / total milestones) * 100
+        const achievedCount = milestones.filter(m => m.achieved).length;
+        progressPercentage = Math.round((achievedCount / milestones.length) * 100);
+      }
+      
+      // Update the goal's progress in the database
+      await careerPlanningService.updateGoalProgress(goalId, progressPercentage);
+      
+      // Update status based on progress
+      let newStatus: 'Not Started' | 'In Progress' | 'Completed' | 'On Hold' | 'Cancelled' = 'Not Started';
+      if (progressPercentage === 100) {
+        newStatus = 'Completed';
+      } else if (progressPercentage > 0) {
+        newStatus = 'In Progress';
+      }
+      
+      // Update goal status if needed
+      const currentGoal = goals.find(g => g.id === goalId);
+      if (currentGoal && currentGoal.currentStatus !== newStatus && currentGoal.currentStatus !== 'On Hold' && currentGoal.currentStatus !== 'Cancelled') {
+        await careerPlanningService.updateGoal(goalId, { currentStatus: newStatus });
+      }
+      
+      // Update local goals state with new progress
+      setGoals(prevGoals => 
+        prevGoals.map(goal => 
+          goal.id === goalId 
+            ? { ...goal, progressPercentage, currentStatus: newStatus }
+            : goal
+        )
+      );
+      
+      // Reload stats to reflect updated progress
+      try {
+        const statsData = await careerPlanningService.getCareerStats();
+        setStats(statsData);
+      } catch (error) {
+        console.error('Error reloading stats:', error);
+      }
+    } catch (error) {
+      console.error('Error calculating progress:', error);
     }
   };
 
@@ -94,6 +149,7 @@ const CareerPlanningPage: React.FC = () => {
     try {
       await careerPlanningService.createMilestone(milestoneFormData);
       if (selectedGoal) {
+        // Reload milestones which will trigger progress recalculation
         await loadMilestones(selectedGoal.id);
       }
       setShowMilestoneModal(false);
@@ -107,6 +163,7 @@ const CareerPlanningPage: React.FC = () => {
     try {
       await careerPlanningService.updateMilestone(milestoneId, { achieved: !achieved });
       if (selectedGoal) {
+        // Reload milestones which will trigger progress recalculation
         await loadMilestones(selectedGoal.id);
       }
     } catch (error) {
@@ -120,6 +177,7 @@ const CareerPlanningPage: React.FC = () => {
     try {
       await careerPlanningService.deleteMilestone(milestoneId);
       if (selectedGoal) {
+        // Reload milestones which will trigger progress recalculation
         await loadMilestones(selectedGoal.id);
       }
     } catch (error) {
@@ -294,14 +352,23 @@ const CareerPlanningPage: React.FC = () => {
                     <div className="mb-3">
                       <div className="flex justify-between text-sm text-gray-600 mb-1">
                         <span>Progress</span>
-                        <span>{goal.progressPercentage}%</span>
+                        <span className="font-semibold text-primary-600">
+                          {Math.min(100, Math.max(0, Math.round(Number(goal.progressPercentage) || 0)))}%
+                        </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                         <div
-                          className="bg-primary-600 h-2 rounded-full transition-all"
-                          style={{ width: `${goal.progressPercentage}%` }}
+                          className="bg-gradient-to-r from-primary-600 to-secondary-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                          style={{ 
+                            width: `${Math.min(100, Math.max(0, Number(goal.progressPercentage) || 0))}%` 
+                          }}
                         />
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {selectedGoal?.id === goal.id && milestones.length > 0 
+                          ? `${milestones.filter(m => m.achieved).length} of ${milestones.length} milestones completed`
+                          : 'Complete milestones to track progress'}
+                      </p>
                     </div>
 
                     {goal.targetDate && (

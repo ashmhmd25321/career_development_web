@@ -18,7 +18,8 @@ import {
   ChevronDown,
   X,
   Heart,
-  Share2
+  Share2,
+  Trash2
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -56,16 +57,59 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
     loadBookmarkedJobs();
   }, []);
 
-  // Load jobs when filters change
+  // Load jobs when filters or user role changes
   useEffect(() => {
     loadJobs();
-  }, [filters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, user?.role]);
 
   const loadJobs = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const jobList = await jobService.getJobs(filters);
+      
+      // For employer users, only show their own posted jobs
+      let jobList: Job[];
+      if (user?.role === 'employer') {
+        jobList = await jobService.getEmployerJobs();
+        // Apply filters to employer's jobs client-side
+        if (filters.search) {
+          const searchLower = filters.search.toLowerCase();
+          jobList = jobList.filter(job => 
+            job.title.toLowerCase().includes(searchLower) ||
+            job.description?.toLowerCase().includes(searchLower) ||
+            job.companyName?.toLowerCase().includes(searchLower)
+          );
+        }
+        if (filters.jobType) {
+          jobList = jobList.filter(job => job.jobType === filters.jobType);
+        }
+        if (filters.locationType) {
+          jobList = jobList.filter(job => job.locationType === filters.locationType);
+        }
+        if (filters.experienceLevel) {
+          jobList = jobList.filter(job => job.experienceLevel === filters.experienceLevel);
+        }
+        if (filters.categoryId) {
+          jobList = jobList.filter(job => job.categoryId === filters.categoryId);
+        }
+        if (filters.location) {
+          const locationLower = filters.location.toLowerCase();
+          jobList = jobList.filter(job => 
+            job.location?.toLowerCase().includes(locationLower)
+          );
+        }
+        if (filters.salaryMin !== undefined) {
+          jobList = jobList.filter(job => job.salaryMin && job.salaryMin >= (filters.salaryMin || 0));
+        }
+        if (filters.salaryMax !== undefined) {
+          jobList = jobList.filter(job => job.salaryMax && job.salaryMax <= (filters.salaryMax || Infinity));
+        }
+      } else {
+        // For students and other users, show all jobs with filters
+        jobList = await jobService.getJobs(filters);
+      }
+      
       setJobs(jobList);
     } catch (err: any) {
       setError(err.message || 'Failed to load jobs');
@@ -73,7 +117,7 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, user?.role]);
 
   const loadCategories = useCallback(async () => {
     try {
@@ -428,9 +472,11 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
 
                 {/* Actions */}
                 <div className="mt-4 lg:mt-0 lg:ml-6 flex flex-col space-y-2">
-                  <Button variant="primary" className="whitespace-nowrap">
-                    Apply Now
-                  </Button>
+                  {user && user.role === 'student' && (
+                    <Button variant="primary" className="whitespace-nowrap">
+                      Apply Now
+                    </Button>
+                  )}
                   <div className="flex space-x-2">
                     <Button 
                       variant="outline" 
@@ -451,6 +497,25 @@ export const JobListingPage: React.FC<JobListingPageProps> = ({ className = '' }
                         )}
                       >
                         <Heart className={cn("w-4 h-4", bookmarkedJobs.has(job.id) && "fill-current")} />
+                      </Button>
+                    )}
+                    {user && user.role === 'admin' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          if (window.confirm(`Are you sure you want to delete "${job.title}"? This action cannot be undone.`)) {
+                            try {
+                              await jobService.deleteJob(job.id);
+                              loadJobs(); // Reload jobs list
+                            } catch (error: any) {
+                              alert(error.message || 'Failed to delete job');
+                            }
+                          }
+                        }}
+                        className="px-2 text-red-600 hover:text-red-700 hover:border-red-300"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
                     <Button

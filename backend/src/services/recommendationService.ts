@@ -12,21 +12,23 @@ export class RecommendationService {
       
       // Get user's application history to understand preferences
       const [applications] = await connection.query(`
-        SELECT DISTINCT j.category_id, j.job_type, j.experience_level, j.location_type
+        SELECT j.category_id, j.job_type, j.experience_level, j.location_type
         FROM applications a
         JOIN jobs j ON a.job_id = j.id
-        WHERE a.user_id = ? AND a.status != 'rejected'
-        ORDER BY a.applied_at DESC
+        WHERE a.student_id = ? AND a.status != 'rejected'
+        GROUP BY j.category_id, j.job_type, j.experience_level, j.location_type
+        ORDER BY MAX(a.applied_at) DESC
         LIMIT 20
       `, [userId]) as any[];
 
       // Get user's bookmarked jobs to understand interests
       const [bookmarks] = await connection.query(`
-        SELECT DISTINCT j.category_id, j.job_type, j.experience_level, j.location_type
+        SELECT j.category_id, j.job_type, j.experience_level, j.location_type
         FROM job_bookmarks b
         JOIN jobs j ON b.job_id = j.id
         WHERE b.user_id = ?
-        ORDER BY b.created_at DESC
+        GROUP BY j.category_id, j.job_type, j.experience_level, j.location_type
+        ORDER BY MAX(b.created_at) DESC
         LIMIT 20
       `, [userId]) as any[];
 
@@ -70,7 +72,7 @@ export class RecommendationService {
 
       // Exclude jobs user has already applied to
       whereConditions.push(`j.id NOT IN (
-        SELECT DISTINCT job_id FROM applications WHERE user_id = ?
+        SELECT DISTINCT job_id FROM applications WHERE student_id = ?
       )`);
       queryParams.push(userId);
 

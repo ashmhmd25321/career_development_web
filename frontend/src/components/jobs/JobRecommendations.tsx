@@ -137,7 +137,8 @@ export const JobRecommendations: React.FC<JobRecommendationsProps> = ({
     });
   };
 
-  const getJobTypeColor = (jobType: string) => {
+  const getJobTypeColor = (jobType?: string) => {
+    if (!jobType) return 'bg-gray-100 text-gray-800';
     switch (jobType) {
       case 'full-time': return 'bg-green-100 text-green-800';
       case 'part-time': return 'bg-blue-100 text-blue-800';
@@ -148,7 +149,8 @@ export const JobRecommendations: React.FC<JobRecommendationsProps> = ({
     }
   };
 
-  const getExperienceLevelColor = (level: string) => {
+  const getExperienceLevelColor = (level?: string) => {
+    if (!level) return 'bg-gray-100 text-gray-800';
     switch (level) {
       case 'entry': return 'bg-green-100 text-green-800';
       case 'mid': return 'bg-blue-100 text-blue-800';
@@ -302,13 +304,17 @@ export const JobRecommendations: React.FC<JobRecommendationsProps> = ({
                   </span>
                 </div>
 
-                <Badge className={getJobTypeColor(job.jobType)}>
-                  {job.jobType.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                </Badge>
+                {job.jobType && (
+                  <Badge className={getJobTypeColor(job.jobType)}>
+                    {job.jobType.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                  </Badge>
+                )}
 
-                <Badge className={getExperienceLevelColor(job.experienceLevel)}>
-                  {job.experienceLevel.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                </Badge>
+                {job.experienceLevel && (
+                  <Badge className={getExperienceLevelColor(job.experienceLevel)}>
+                    {job.experienceLevel.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                  </Badge>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-4 text-sm mb-4">

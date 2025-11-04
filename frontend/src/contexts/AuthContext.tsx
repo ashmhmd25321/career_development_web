@@ -10,6 +10,7 @@ export interface User {
   phone?: string;
   bio?: string;
   location?: string;
+  avatarUrl?: string;
   isActive: boolean;
   isVerified: boolean;
   createdAt: string;

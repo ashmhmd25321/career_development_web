@@ -31,6 +31,13 @@ const toCamelCase = (job: any): Job => {
     applicationsCount: job.applications_count,
     createdAt: job.created_at,
     updatedAt: job.updated_at,
+    // Joined fields (may be undefined depending on the query)
+    companyName: job.company_name,
+    companySize: job.company_size,
+    industry: job.industry,
+    logoUrl: job.logo_url,
+    websiteUrl: job.website_url,
+    categoryName: job.category_name,
   };
 };
 
@@ -45,8 +52,10 @@ export const jobService = {
         j.salary_currency, j.experience_level, j.category_id, j.application_deadline, 
         j.start_date, j.status, j.is_active, j.is_featured, j.views_count, j.applications_count, 
         j.created_at, j.updated_at,
+        ep.company_name, ep.company_size, ep.industry, ep.logo_url, ep.website_url,
         jc.name as category_name
       FROM jobs j
+      LEFT JOIN employer_profiles ep ON j.employer_id = ep.user_id
       LEFT JOIN job_categories jc ON j.category_id = jc.id
       WHERE j.status = 'active'
     `;

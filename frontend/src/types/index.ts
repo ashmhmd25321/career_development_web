@@ -74,6 +74,8 @@ export interface CreateJobData {
   applicationDeadline?: string;
   startDate?: string;
   status?: Job['status'];
+  // Optional company name to upsert employer profile during job creation
+  companyName?: string;
 }
 
 export interface UpdateJobData {
@@ -124,7 +126,7 @@ export interface ApiResponse<T = any> {
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
-  expiresIn: string;
+  expiresIn: number; // seconds
 }
 
 export interface LoginRequest {

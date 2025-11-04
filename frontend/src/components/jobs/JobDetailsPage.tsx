@@ -408,19 +408,7 @@ export const JobDetailsPage: React.FC = () => {
                   <MapPin className="w-4 h-4 text-gray-500" />
                   <span>{job.location || 'Remote'}</span>
                 </div>
-                {job.websiteUrl && (
-                  <div className="flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4 text-gray-500" />
-                    <a 
-                      href={job.websiteUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary-600 hover:text-primary-700"
-                    >
-                      Company Website
-                    </a>
-                  </div>
-                )}
+                {/* Company website intentionally hidden */}
               </div>
             </CardContent>
           </Card>

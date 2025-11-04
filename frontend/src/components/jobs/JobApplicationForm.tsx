@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Card, CardHeader, CardContent, Input } from '../ui';
 import { applicationService } from '../../services/applicationService';
 import { Job, CreateApplicationData } from '../../types';
@@ -26,13 +26,24 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
   onClose,
   onSuccess
 }) => {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [formData, setFormData] = useState({
-    notes: ''
+    notes: '',
+    phone: user?.phone || ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Update phone number when user changes
+  useEffect(() => {
+    if (user?.phone) {
+      setFormData(prev => ({
+        ...prev,
+        phone: user.phone || ''
+      }));
+    }
+  }, [user?.phone]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,10 +53,29 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
       return;
     }
 
+    // Validate phone number is provided
+    const phoneNumber = formData.phone.trim();
+    if (!phoneNumber) {
+      setError('Phone number is required for employers to contact you. Please provide your contact number.');
+      return;
+    }
+
+    // Validate phone format (basic validation)
+    const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      setError('Please enter a valid phone number (at least 10 digits)');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
+      // Update user profile with phone number if it's different
+      if (phoneNumber !== user.phone) {
+        await updateProfile({ phone: phoneNumber });
+      }
+
       const applicationData: CreateApplicationData = {
         jobId: job.id,
         notes: formData.notes.trim() || undefined
@@ -67,7 +97,7 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -126,7 +156,7 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
                 <User className="w-4 h-4" />
                 Your Information
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Mail className="w-4 h-4" />
                   <span>{user?.email}</span>
@@ -135,6 +165,31 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
                   <User className="w-4 h-4" />
                   <span>{user?.firstName} {user?.lastName}</span>
                 </div>
+              </div>
+              
+              {/* Phone Number - Required */}
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Phone className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="Enter your phone number (e.g., +1 234 567 8900)"
+                    required
+                    className={`pl-10 ${!formData.phone.trim() ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Required so employers can contact you about this application
+                </p>
               </div>
             </div>
 
