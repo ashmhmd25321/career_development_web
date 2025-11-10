@@ -145,6 +145,37 @@ export class UserService {
   }
 
   /**
+   * Get user by ID without active status filter (for admin operations)
+   */
+  static async getUserByIdUnfiltered(userId: number): Promise<User | null> {
+    const connection = getConnection();
+    
+    try {
+      const [users] = await connection.query(
+        'SELECT * FROM users WHERE id = ?',
+        [userId]
+      );
+
+      if (!Array.isArray(users) || users.length === 0) {
+        return null;
+      }
+
+      const user = (users as any)[0];
+      
+      // Remove sensitive data
+      delete user.password_hash;
+      delete user.email_verification_token;
+      delete user.password_reset_token;
+      delete user.password_reset_expires;
+
+      return this.formatUser(user);
+    } catch (error) {
+      logger.error('Error getting user by ID (unfiltered):', error);
+      throw error;
+    }
+  }
+
+  /**
    * Update user profile
    */
   static async updateUser(userId: number, updateData: UpdateUserData): Promise<User | null> {
@@ -203,7 +234,9 @@ export class UserService {
         values
       );
 
-      return await this.getUserById(userId);
+      // Use unfiltered method to get user regardless of active status
+      // This is needed when deactivating users
+      return await this.getUserByIdUnfiltered(userId);
     } catch (error) {
       logger.error('Error updating user:', error);
       throw error;

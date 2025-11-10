@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Button, Card, CardHeader, CardContent, Input, Modal } from './components/ui';
+import { Button, Card, CardHeader, CardContent, Input, Modal, ToastProvider } from './components/ui';
 import { Header } from './components/layout';
 import { JobPostingForm, JobListingPage, JobDetailsPage, ApplicationTrackingPage, SavedJobsPage, JobRecommendations } from './components/jobs';
 import { ProfilePage } from './components/profile/ProfilePage';
@@ -26,7 +26,8 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
+        <ToastProvider>
+          <Router>
           <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
             {/* Header with Authentication */}
             <Header />
@@ -114,6 +115,7 @@ function App() {
             </footer>
     </div>
         </Router>
+        </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   );

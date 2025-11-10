@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Card, CardContent, Badge, Button, Input } from '../ui';
+import { Card, CardContent, Badge, Button, Input, useToast } from '../ui';
 import { 
   Users, 
   Search,
@@ -38,6 +38,7 @@ interface User {
 
 export const UserManagementPage: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +99,7 @@ export const UserManagementPage: React.FC = () => {
       const authTokens = localStorage.getItem('authTokens');
       const tokens = authTokens ? JSON.parse(authTokens) : null;
       
-      const response = await axios.patch<{ success: boolean; data: { user: User } }>(
+      const response = await axios.patch<{ success: boolean; data: { user: User }; message?: string }>(
         `${API_BASE_URL}/auth/users/${userId}/status`,
         { isActive: !currentStatus },
         {
@@ -121,10 +122,19 @@ export const UserManagementPage: React.FC = () => {
             u.id === userId ? updatedUser : u
           )
         );
+        
+        // Show success toast
+        const action = currentStatus ? 'deactivated' : 'activated';
+        showToast(
+          response.data.message || `User ${action} successfully`,
+          'success',
+          4000
+        );
       }
     } catch (err: any) {
       console.error('Error updating user status:', err);
-      alert(err.response?.data?.error?.message || 'Failed to update user status');
+      const errorMessage = err.response?.data?.error?.message || 'Failed to update user status';
+      showToast(errorMessage, 'error', 5000);
     }
   };
 
